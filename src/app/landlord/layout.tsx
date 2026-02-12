@@ -2,19 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import TenantSidebar from "@/components/tenant/Sidebar";
+import LandlordSidebar from "@/components/landlord/Sidebar";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 
-// Inner shell: consumes theme and applies data-theme to the root div.
-// Must be a child of ThemeProvider — a component can't consume its own context.
-function TenantShell({ children }: { children: React.ReactNode }) {
+function LandlordShell({ children }: { children: React.ReactNode }) {
   const { resolvedTheme } = useTheme();
   return (
     <div
       data-theme={resolvedTheme}
       className="flex h-screen bg-slate-50 overflow-hidden"
     >
-      <TenantSidebar />
+      <LandlordSidebar />
       <main className="flex-1 overflow-y-auto">
         {children}
       </main>
@@ -22,13 +20,13 @@ function TenantShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function TenantLayout({ children }: { children: React.ReactNode }) {
+export default function LandlordLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
     const role = localStorage.getItem("role");
-    if (role !== "tenant") {
+    if (role !== "landlord") {
       router.replace("/login");
     } else {
       setAuthorized(true);
@@ -45,7 +43,7 @@ export default function TenantLayout({ children }: { children: React.ReactNode }
 
   return (
     <ThemeProvider>
-      <TenantShell>{children}</TenantShell>
+      <LandlordShell>{children}</LandlordShell>
     </ThemeProvider>
   );
 }

@@ -10,7 +10,14 @@ import {
   FileText,
   ShieldCheck,
   CreditCard,
+  Sun,
+  Moon,
+  Monitor,
+  Mail,
+  Phone,
+  ChevronDown,
 } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 // ── Types ───────────────────────────────────────────────────────────────────────
 
@@ -58,6 +65,11 @@ export default function ProfilePage() {
   const [govId, setGovId]         = useState<DocState>({ name: "", file: null });
   const [insurance, setInsurance] = useState<DocState>({ name: "", file: null });
   const [leaseDoc, setLeaseDoc]   = useState<DocState>({ name: "", file: null });
+
+  // Preferences
+  const { theme, setTheme } = useTheme();
+  const [contactMethod, setContactMethod] = useState<"Email" | "Phone">("Email");
+  const [language, setLanguage]           = useState("English");
 
   const [toast, setToast] = useState<string | null>(null);
 
@@ -286,6 +298,105 @@ export default function ProfilePage() {
               </div>
             );
           })}
+
+        </div>
+      </div>
+
+      {/* ── Preferences card ────────────────────────────────────────────────── */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm mt-6">
+        <h2 className="mb-5 text-sm font-semibold text-slate-700">Preferences</h2>
+        <div className="space-y-6">
+
+          {/* A) Contact Method */}
+          <div>
+            <label className="block text-xs font-medium uppercase tracking-wide text-slate-400">
+              Preferred Contact Method
+            </label>
+            <div className="mt-3 flex gap-6">
+              {(
+                [
+                  { value: "Email", icon: Mail,  label: "Email"           },
+                  { value: "Phone", icon: Phone, label: "Phone (SMS/Call)" },
+                ] as const
+              ).map(({ value, icon: Icon, label }) => (
+                <label key={value} className="flex items-center gap-2.5 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="contactMethod"
+                    checked={contactMethod === value}
+                    onChange={() => setContactMethod(value)}
+                    className="accent-blue-600 h-4 w-4 flex-shrink-0"
+                  />
+                  <Icon className="h-4 w-4 text-slate-500 flex-shrink-0" />
+                  <span className="text-sm text-slate-700">{label}</span>
+                </label>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-slate-400">
+              This is how we&apos;ll contact you for important updates.
+            </p>
+          </div>
+
+          {/* B) Language */}
+          <div>
+            <label className="block text-xs font-medium uppercase tracking-wide text-slate-400">
+              Language Preference
+            </label>
+            <div className="relative mt-1.5">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="w-full appearance-none rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              >
+                {["English", "French", "Spanish", "Urdu", "Hindi", "Arabic", "Other"].map((l) => (
+                  <option key={l}>{l}</option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            </div>
+          </div>
+
+          {/* C) Theme */}
+          <div>
+            <label className="block text-xs font-medium uppercase tracking-wide text-slate-400">
+              Theme
+            </label>
+            <p className="mt-1 text-xs text-slate-400">
+              Updates the dashboard immediately and persists across sessions.
+            </p>
+            <div className="mt-2 flex gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
+              {(
+                [
+                  { value: "light",  icon: Sun,     label: "Light"  },
+                  { value: "dark",   icon: Moon,    label: "Dark"   },
+                  { value: "system", icon: Monitor, label: "System" },
+                ] as const
+              ).map(({ value, icon: Icon, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setTheme(value)}
+                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition ${
+                    theme === value
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Save (contact + language; theme is already immediate) */}
+          <button
+            type="button"
+            onClick={() => showToast("Preferences saved.")}
+            className="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
+          >
+            Save Preferences
+          </button>
 
         </div>
       </div>
