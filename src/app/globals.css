@@ -35,3 +35,23 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* ── Dark theme: remap Tailwind's slate + white CSS variables ──────────────
+   Applied on the tenant layout root div via data-theme="dark".
+   Because Tailwind v4 generates utilities with var(--color-*), overriding
+   these variables here automatically flips every bg/text/border utility
+   inside the tenant shell — no changes needed on individual pages.
+   ────────────────────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --color-white:     #1e293b; /* card backgrounds  */
+  --color-slate-50:  #0f172a; /* page background   */
+  --color-slate-100: #1e293b; /* hover bg          */
+  --color-slate-200: #334155; /* borders           */
+  --color-slate-300: #475569; /* subtle dividers   */
+  --color-slate-400: #64748b; /* muted text        */
+  --color-slate-500: #94a3b8; /* secondary text    */
+  --color-slate-600: #cbd5e1; /* body text         */
+  --color-slate-700: #e2e8f0; /* label text        */
+  --color-slate-800: #f1f5f9; /* secondary heading */
+  --color-slate-900: #f8fafc; /* primary text      */
+}
