@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
@@ -58,6 +59,8 @@ function validate(fields: FormFields): Record<string, string> {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function TenantRegisterPage() {
+  const router = useRouter();
+
   // Field values
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -103,8 +106,12 @@ export default function TenantRegisterPage() {
     if (Object.keys(errs).length > 0) return;
 
     setIsLoading(true);
-    // TODO: wire up your backend / API call here
-    setTimeout(() => setIsLoading(false), 1500);
+    // Simulate API call, then set fake session and redirect
+    setTimeout(() => {
+      localStorage.setItem("role", "tenant");
+      localStorage.setItem("tenantOnboarded", "true");
+      router.push("/tenant/dashboard");
+    }, 800);
   };
 
   // Shared Tailwind helpers
