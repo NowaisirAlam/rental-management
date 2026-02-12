@@ -38,7 +38,7 @@ export default function LoginRolePage() {
             return (
               <Link
                 key={role.key}
-                href={`/login/${role.key}`}
+                href={role.key === "landlord" ? "/landlord/dashboard" : `/login/${role.key}`}
                 className="group rounded-xl border border-border bg-surface p-5 transition hover:border-primary/40 hover:bg-white hover:shadow-md"
               >
                 <Icon className="h-7 w-7 text-primary" />
