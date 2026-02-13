@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import TenantSidebar from "@/components/tenant/Sidebar";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
@@ -12,10 +13,10 @@ function TenantShell({ children }: { children: React.ReactNode }) {
   return (
     <div
       data-theme={resolvedTheme}
-      className="flex h-screen bg-slate-50 overflow-hidden"
+      className="min-h-screen flex bg-slate-50 overflow-hidden"
     >
       <TenantSidebar />
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 min-w-0 w-full overflow-y-auto">
         {children}
       </main>
     </div>
@@ -23,19 +24,17 @@ function TenantShell({ children }: { children: React.ReactNode }) {
 }
 
 export default function TenantLayout({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
-    const role = localStorage.getItem("role");
-    if (role !== "tenant") {
+    if (status === "loading") return;
+    if (status === "unauthenticated" || session?.user?.role !== "TENANT") {
       router.replace("/login");
-    } else {
-      setAuthorized(true);
     }
-  }, [router]);
+  }, [status, session, router]);
 
-  if (!authorized) {
+  if (status === "loading" || !session || session.user.role !== "TENANT") {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
