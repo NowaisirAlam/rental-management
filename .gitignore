@@ -49,3 +49,8 @@ next-env.d.ts
 /src/app/(landlord)/
 
 BLUEPRINT.md
+
+dev.db
+.env
+.env.local
+node_modules
