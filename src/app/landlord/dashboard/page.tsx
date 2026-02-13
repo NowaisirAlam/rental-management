@@ -1,16 +1,46 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import {
   DollarSign,
   Clock,
-  AlertTriangle,
+  Home,
   Wrench,
   Plus,
   Users,
   Bell,
   CreditCard,
+  Loader2,
 } from "lucide-react";
+
+// ── Types ────────────────────────────────────────────────────────────────────
+
+type DashboardData = {
+  role: string;
+  stats: {
+    totalProperties: number;
+    totalRevenue: number;
+    pendingPayments: number;
+    openMaintenance: number;
+  };
+  recentPayments: {
+    id: string;
+    amount: number;
+    status: string;
+    dueDate: string;
+    property: { name: string };
+  }[];
+  recentMaintenance: {
+    id: string;
+    title: string;
+    status: string;
+    createdAt: string;
+    property: { name: string };
+    createdBy: { name: string };
+  }[];
+};
 
 // ── Stat card ─────────────────────────────────────────────────────────────────
 
@@ -45,15 +75,69 @@ function StatCard({
   );
 }
 
+// ── Status helpers ───────────────────────────────────────────────────────────
+
+const paymentStatusColor: Record<string, string> = {
+  PAID: "bg-green-100 text-green-700",
+  PENDING: "bg-amber-100 text-amber-700",
+  LATE: "bg-red-100 text-red-700",
+};
+
+const maintenanceStatusColor: Record<string, string> = {
+  OPEN: "bg-blue-100 text-blue-700",
+  IN_PROGRESS: "bg-amber-100 text-amber-700",
+  RESOLVED: "bg-green-100 text-green-700",
+  CLOSED: "bg-slate-100 text-slate-600",
+};
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function LandlordDashboard() {
+  const { data: session } = useSession();
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/dashboard")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load dashboard");
+        return res.json();
+      })
+      .then(setData)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full py-32">
+        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+        <span className="ml-2 text-sm text-slate-500">Loading dashboard...</span>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full py-32">
+        <p className="text-sm text-red-600 mb-3">{error ?? "Failed to load"}</p>
+        <button onClick={() => window.location.reload()} className="text-sm text-blue-600 hover:underline">
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  const { stats, recentPayments, recentMaintenance } = data;
+  const userName = session?.user?.name?.split(" ")[0] ?? "there";
+
   return (
     <div className="px-8 py-8 max-w-5xl mx-auto">
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Welcome back, James</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Welcome back, {userName}</h1>
         <p className="mt-1 text-sm text-slate-500">
           Here&apos;s an overview of your properties for {new Date().toLocaleString("en-US", { month: "long", year: "numeric" })}.
         </p>
@@ -66,32 +150,32 @@ export default function LandlordDashboard() {
           iconBg="bg-green-50"
           iconColor="text-green-600"
           label="Rent Received"
-          value="$18,400"
-          helper="This month · 8 of 10 paid"
+          value={`$${stats.totalRevenue.toLocaleString()}`}
+          helper="Total collected"
         />
         <StatCard
           icon={Clock}
           iconBg="bg-amber-50"
           iconColor="text-amber-600"
           label="Pending Payments"
-          value="2"
-          helper="$2,800 outstanding"
+          value={String(stats.pendingPayments)}
+          helper="Awaiting payment"
         />
         <StatCard
-          icon={AlertTriangle}
-          iconBg="bg-red-50"
-          iconColor="text-red-500"
-          label="Leases Expiring"
-          value="3"
-          helper="Within next 60 days"
+          icon={Home}
+          iconBg="bg-blue-50"
+          iconColor="text-blue-600"
+          label="Properties"
+          value={String(stats.totalProperties)}
+          helper="Total properties"
         />
         <StatCard
           icon={Wrench}
-          iconBg="bg-blue-50"
-          iconColor="text-blue-600"
+          iconBg="bg-red-50"
+          iconColor="text-red-500"
           label="Open Tickets"
-          value="5"
-          helper="2 high priority"
+          value={String(stats.openMaintenance)}
+          helper="Active requests"
         />
       </div>
 
@@ -138,20 +222,20 @@ export default function LandlordDashboard() {
             </Link>
           </div>
           <div className="space-y-3">
-            {[
-              { name: "Marcus Reid",    unit: "Unit 2A", amount: "$1,800", status: "Paid",    color: "bg-green-100 text-green-700" },
-              { name: "Priya Sharma",   unit: "Unit 3C", amount: "$2,200", status: "Paid",    color: "bg-green-100 text-green-700" },
-              { name: "Tom Eriksson",   unit: "Unit 1B", amount: "$1,400", status: "Pending", color: "bg-amber-100 text-amber-700" },
-              { name: "Lena Kowalski",  unit: "Unit 4D", amount: "$1,400", status: "Overdue", color: "bg-red-100 text-red-700"   },
-            ].map((row) => (
-              <div key={row.name} className="flex items-center justify-between gap-3">
+            {recentPayments.length === 0 && (
+              <p className="text-sm text-slate-400 py-4 text-center">No payments yet.</p>
+            )}
+            {recentPayments.map((row) => (
+              <div key={row.id} className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-medium text-slate-800">{row.name}</p>
-                  <p className="text-xs text-slate-400">{row.unit}</p>
+                  <p className="text-sm font-medium text-slate-800">{row.property.name}</p>
+                  <p className="text-xs text-slate-400">
+                    {new Date(row.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-semibold text-slate-900">{row.amount}</span>
-                  <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${row.color}`}>
+                  <span className="text-sm font-semibold text-slate-900">${row.amount.toLocaleString()}</span>
+                  <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${paymentStatusColor[row.status] ?? "bg-slate-100 text-slate-600"}`}>
                     {row.status}
                   </span>
                 </div>
@@ -169,19 +253,17 @@ export default function LandlordDashboard() {
             </Link>
           </div>
           <div className="space-y-3">
-            {[
-              { title: "Leaking pipe under sink",  unit: "Unit 2A", priority: "High",   color: "bg-orange-100 text-orange-700" },
-              { title: "Broken window lock",        unit: "Unit 3C", priority: "Medium", color: "bg-amber-100 text-amber-700"  },
-              { title: "HVAC not working",          unit: "Unit 1B", priority: "High",   color: "bg-orange-100 text-orange-700" },
-              { title: "Light bulb replacement",    unit: "Unit 4D", priority: "Low",    color: "bg-slate-100 text-slate-600"  },
-            ].map((t) => (
-              <div key={t.title} className="flex items-center justify-between gap-3">
+            {recentMaintenance.length === 0 && (
+              <p className="text-sm text-slate-400 py-4 text-center">No maintenance requests yet.</p>
+            )}
+            {recentMaintenance.map((t) => (
+              <div key={t.id} className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-slate-800">{t.title}</p>
-                  <p className="text-xs text-slate-400">{t.unit}</p>
+                  <p className="text-xs text-slate-400">{t.property.name}</p>
                 </div>
-                <span className={`flex-shrink-0 inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${t.color}`}>
-                  {t.priority}
+                <span className={`flex-shrink-0 inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${maintenanceStatusColor[t.status] ?? "bg-slate-100 text-slate-600"}`}>
+                  {t.status}
                 </span>
               </div>
             ))}
