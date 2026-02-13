@@ -1,24 +1,50 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Add your sign-in logic here
-    setTimeout(() => {
+    setError("");
+
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      setError("Invalid email or password");
       setIsLoading(false);
-    }, 1000);
+      return;
+    }
+
+    // Fetch session to get role for redirect
+    const res = await fetch("/api/auth/session");
+    const session = await res.json();
+    const role = session?.user?.role;
+
+    if (role === "LANDLORD") {
+      router.push("/landlord/dashboard");
+    } else if (role === "TENANT") {
+      router.push("/tenant/dashboard");
+    } else {
+      router.push("/");
+    }
   };
 
   return (
@@ -39,6 +65,13 @@ export default function LoginPage() {
                 Sign in to your PropManager account
               </p>
             </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                {error}
+              </div>
+            )}
 
             {/* Login Form */}
             <form onSubmit={handleSignIn} className="space-y-5">
@@ -133,18 +166,26 @@ export default function LoginPage() {
             <div className="my-6 flex items-center gap-3">
               <div className="flex-1 border-t border-slate-300"></div>
               <span className="text-xs font-medium text-slate-500 uppercase">
-                or
+                demo accounts
               </span>
               <div className="flex-1 border-t border-slate-300"></div>
             </div>
 
-            {/* Social Login Buttons */}
+            {/* Demo Login Buttons */}
             <div className="space-y-3">
-              <button className="w-full rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition duration-300 hover:bg-slate-50 active:scale-95 shadow-sm">
-                Continue with Google
+              <button
+                type="button"
+                onClick={() => { setEmail("landlord@demo.com"); setPassword("password123"); }}
+                className="w-full rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition duration-300 hover:bg-slate-50 active:scale-95 shadow-sm"
+              >
+                Login as Landlord
               </button>
-              <button className="w-full rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition duration-300 hover:bg-slate-50 active:scale-95 shadow-sm">
-                Continue with Facebook
+              <button
+                type="button"
+                onClick={() => { setEmail("tenant@demo.com"); setPassword("password123"); }}
+                className="w-full rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition duration-300 hover:bg-slate-50 active:scale-95 shadow-sm"
+              >
+                Login as Tenant
               </button>
             </div>
 
