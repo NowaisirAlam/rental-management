@@ -7,22 +7,13 @@ import { Plus, Home, Upload, Trash2, X, CheckCircle2, ChevronDown,
 type DocState = { name: string; file: File | null };
 
 type Property = {
-  id: number;
+  id: string;
   name: string;
-  type: string;
   address: string;
-  city: string;
-  postal: string;
-  units: string;
-  yearBuilt: string;
-  amenities: string;
-  image: string;
+  createdAt: string;
+  tenants: { id: string; name: string; email: string }[];
+  _count: { maintenanceRequests: number; rentPayments: number };
 };
-
-const initialProperties: Property[] = [
-  { id: 1, name: "Maplewood Residences", type: "Apartment Building", address: "742 Maplewood Drive", city: "Toronto",    postal: "M5V 2K1", units: "8", yearBuilt: "2001", amenities: "Parking, Laundry, Gym", image: "" },
-  { id: 2, name: "Oakview Apartments",   type: "Apartment Building", address: "19 Oakview Lane",     city: "Mississauga", postal: "L5B 4T3", units: "6", yearBuilt: "1998", amenities: "Parking, Storage",      image: "" },
-];
 
 const PROPERTY_TYPES = [
   "Apartment Building", "Condo", "Single Family Home",
@@ -128,17 +119,11 @@ function ViewPropertyModal({ property, onClose, onEdit }: { property: Property; 
             <X className="h-4 w-4" />
           </button>
         </div>
-        {property.image && (
-          <div className="px-6 pb-3">
-            <img src={property.image} alt={property.name} className="h-40 w-full rounded-xl object-cover" />
-          </div>
-        )}
         <div className="px-6 pb-2">
-          {row("Type",      property.type)}
-          {row("Address",   `${property.address}, ${property.city} ${property.postal}`)}
-          {row("Units",     property.units)}
-          {row("Year Built",property.yearBuilt)}
-          {row("Amenities", property.amenities)}
+          {row("Address", property.address)}
+          {row("Tenants", `${property.tenants.length} tenant${property.tenants.length !== 1 ? 's' : ''}`)}
+          {row("Maintenance", `${property._count.maintenanceRequests} request${property._count.maintenanceRequests !== 1 ? 's' : ''}`)}
+          {row("Payments", `${property._count.rentPayments} payment${property._count.rentPayments !== 1 ? 's' : ''}`)}
         </div>
         <div className="flex items-center justify-end gap-3 border-t border-slate-100 px-6 py-4">
           <button onClick={onClose} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95">
@@ -191,11 +176,13 @@ function ConfirmDeleteModal({ title, onCancel, onConfirm }: { title: string; onC
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function LandlordProperties() {
-  const [properties, setProperties] = useState<Property[]>(initialProperties);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm]     = useState(false);
-  const [editingId, setEditingId]   = useState<number | null>(null);
+  const [editingId, setEditingId]   = useState<string | null>(null);
   const [viewProperty,   setViewProperty]   = useState<Property | null>(null);
-  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [toast, setToast]           = useState<string | null>(null);
 
   // Form state
@@ -219,6 +206,29 @@ export default function LandlordProperties() {
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3500); };
 
+  // Fetch properties on mount
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  const fetchProperties = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch("/api/properties");
+      if (!res.ok) {
+        throw new Error(`Failed to fetch properties: ${res.statusText}`);
+      }
+      const data = await res.json();
+      setProperties(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load properties");
+      console.error("Error fetching properties:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const resetForm = () => {
     setName(""); setType(""); setAddress(""); setCity(""); setPostal("");
     setUnits(""); setYearBuilt(""); setAmenities(""); setImagePreview("");
@@ -229,10 +239,16 @@ export default function LandlordProperties() {
 
   const openEditForm = (p: Property) => {
     setEditingId(p.id);
-    setName(p.name); setType(p.type); setAddress(p.address);
-    setCity(p.city); setPostal(p.postal); setUnits(p.units);
-    setYearBuilt(p.yearBuilt); setAmenities(p.amenities);
-    setImagePreview(p.image);
+    setName(p.name);
+    setAddress(p.address);
+    // Reset other fields since they're not in the DB
+    setType("");
+    setCity("");
+    setPostal("");
+    setUnits("");
+    setYearBuilt("");
+    setAmenities("");
+    setImagePreview("");
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -246,33 +262,69 @@ export default function LandlordProperties() {
     e.target.value = "";
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (editingId !== null) {
-      setProperties((prev) =>
-        prev.map((p) => p.id === editingId
-          ? { ...p, name, type, address, city, postal, units, yearBuilt, amenities, image: imagePreview }
-          : p
-        )
-      );
-      showToast(`"${name}" updated.`);
-    } else {
-      const newProp: Property = {
-        id: Date.now(), name, type, address, city, postal, units, yearBuilt, amenities, image: imagePreview,
-      };
-      setProperties((prev) => [newProp, ...prev]);
-      showToast(`"${name}" added successfully.`);
+
+    try {
+      const payload = { name, address };
+
+      if (editingId !== null) {
+        // Update existing property
+        const res = await fetch(`/api/properties/${editingId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          throw new Error(`Failed to update property: ${res.statusText}`);
+        }
+
+        showToast(`"${name}" updated.`);
+      } else {
+        // Create new property
+        const res = await fetch("/api/properties", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          throw new Error(`Failed to create property: ${res.statusText}`);
+        }
+
+        showToast(`"${name}" added successfully.`);
+      }
+
+      resetForm();
+      setEditingId(null);
+      setShowForm(false);
+      await fetchProperties();
+    } catch (err) {
+      console.error("Error submitting property:", err);
+      showToast(err instanceof Error ? err.message : "Failed to save property");
     }
-    resetForm();
-    setEditingId(null);
-    setShowForm(false);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (deleteTargetId === null) return;
-    setProperties((prev) => prev.filter((p) => p.id !== deleteTargetId));
-    setDeleteTargetId(null);
-    showToast("Property removed.");
+
+    try {
+      const res = await fetch(`/api/properties/${deleteTargetId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to delete property: ${res.statusText}`);
+      }
+
+      setDeleteTargetId(null);
+      showToast("Property removed.");
+      await fetchProperties();
+    } catch (err) {
+      console.error("Error deleting property:", err);
+      showToast(err instanceof Error ? err.message : "Failed to delete property");
+    }
   };
 
   const handleDocUpload = (
@@ -291,6 +343,37 @@ export default function LandlordProperties() {
     { label: "Property Registration", state: registrationDoc, setter: setRegistrationDoc },
     { label: "Floor Plans",           state: floorPlanDoc,    setter: setFloorPlanDoc    },
   ];
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+          <p className="mt-3 text-sm text-slate-500">Loading properties...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+            <AlertTriangle className="h-6 w-6 text-red-600" />
+          </div>
+          <h2 className="mt-4 text-lg font-semibold text-slate-900">Failed to load properties</h2>
+          <p className="mt-1 text-sm text-slate-500">{error}</p>
+          <button
+            onClick={fetchProperties}
+            className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-8 py-8 max-w-4xl mx-auto">
@@ -433,35 +516,51 @@ export default function LandlordProperties() {
 
       {/* Property list */}
       <div className="space-y-4">
-        {properties.map((p) => (
-          <div key={p.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 overflow-hidden">
-                  {p.image
-                    ? <img src={p.image} alt={p.name} className="h-full w-full object-cover" />
-                    : <Home className="h-5 w-5 text-blue-600" />
-                  }
-                </div>
-                <div>
-                  <p className="font-semibold text-slate-900">{p.name}</p>
-                  <p className="text-sm text-slate-500">{p.address}, {p.city} {p.postal}</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">{p.type}</span>
-                    <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-600">{p.units} units</span>
-                    {p.yearBuilt && <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">Built {p.yearBuilt}</span>}
-                    {p.amenities && <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500">{p.amenities}</span>}
+        {properties.length === 0 ? (
+          <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center">
+            <Home className="mx-auto h-12 w-12 text-slate-300" />
+            <h3 className="mt-4 text-sm font-semibold text-slate-900">No properties yet</h3>
+            <p className="mt-1 text-sm text-slate-500">Get started by adding your first property.</p>
+            <button
+              onClick={() => { resetForm(); setEditingId(null); setShowForm(true); }}
+              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+            >
+              <Plus className="h-4 w-4" /> Add Property
+            </button>
+          </div>
+        ) : (
+          properties.map((p) => (
+            <div key={p.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50">
+                    <Home className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">{p.name}</p>
+                    <p className="text-sm text-slate-500">{p.address}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-600">
+                        {p.tenants.length} tenant{p.tenants.length !== 1 ? 's' : ''}
+                      </span>
+                      <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                        {p._count.maintenanceRequests} request{p._count.maintenanceRequests !== 1 ? 's' : ''}
+                      </span>
+                      <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                        {p._count.rentPayments} payment{p._count.rentPayments !== 1 ? 's' : ''}
+                      </span>
+                    </div>
                   </div>
                 </div>
+                <ActionsMenu
+                  onView={() => setViewProperty(p)}
+                  onEdit={() => openEditForm(p)}
+                  onDelete={() => setDeleteTargetId(p.id)}
+                />
               </div>
-              <ActionsMenu
-                onView={() => setViewProperty(p)}
-                onEdit={() => openEditForm(p)}
-                onDelete={() => setDeleteTargetId(p.id)}
-              />
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {viewProperty && (
