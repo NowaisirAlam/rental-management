@@ -3,22 +3,44 @@
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { signIn, getSession } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState("");
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: { preventDefault(): void }) => {
     e.preventDefault();
     setIsLoading(true);
-    // Add your sign-in logic here
-    setTimeout(() => {
+    setServerError("");
+
+    const result = await signIn("credentials", {
+      email: email.trim().toLowerCase(),
+      password,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      setServerError("Invalid email or password. Please try again.");
       setIsLoading(false);
-    }, 1000);
+      return;
+    }
+
+    const session = await getSession();
+    if (session?.user?.role === "TENANT") {
+      router.push("/tenant/dashboard");
+    } else if (session?.user?.role === "LANDLORD") {
+      router.push("/landlord/dashboard");
+    } else {
+      router.push("/");
+    }
   };
 
   return (
@@ -39,6 +61,13 @@ export default function LoginPage() {
                 Sign in to your PropManager account
               </p>
             </div>
+
+            {/* Server error banner */}
+            {serverError && (
+              <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {serverError}
+              </div>
+            )}
 
             {/* Login Form */}
             <form onSubmit={handleSignIn} className="space-y-5">
