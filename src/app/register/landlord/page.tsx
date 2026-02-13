@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronDown, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -128,16 +130,55 @@ export default function LandlordRegisterPage() {
     setErrors(validate(currentFields()));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const router = useRouter();
+  const [apiError, setApiError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
+    setApiError("");
     const errs = validate(currentFields());
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
     setIsLoading(true);
-    // TODO: wire up your backend / API call here
-    setTimeout(() => setIsLoading(false), 1500);
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: fullName,
+          email,
+          password,
+          role: "LANDLORD",
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setApiError(data.error || "Registration failed");
+        setIsLoading(false);
+        return;
+      }
+
+      // Auto-login after registration
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setApiError("Account created but login failed. Please log in manually.");
+        setIsLoading(false);
+        return;
+      }
+
+      router.push("/landlord/dashboard");
+    } catch {
+      setApiError("Something went wrong. Please try again.");
+      setIsLoading(false);
+    }
   };
 
   // Shared Tailwind helpers

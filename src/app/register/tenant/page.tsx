@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -98,20 +99,53 @@ export default function TenantRegisterPage() {
     setErrors(validate(currentFields()));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [apiError, setApiError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
+    setApiError("");
     const errs = validate(currentFields());
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
     setIsLoading(true);
-    // Simulate API call, then set fake session and redirect
-    setTimeout(() => {
-      localStorage.setItem("role", "tenant");
-      localStorage.setItem("tenantOnboarded", "true");
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: fullName,
+          email,
+          password,
+          role: "TENANT",
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setApiError(data.error || "Registration failed");
+        setIsLoading(false);
+        return;
+      }
+
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setApiError("Account created but login failed. Please log in manually.");
+        setIsLoading(false);
+        return;
+      }
+
       router.push("/tenant/dashboard");
-    }, 800);
+    } catch {
+      setApiError("Something went wrong. Please try again.");
+      setIsLoading(false);
+    }
   };
 
   // Shared Tailwind helpers
