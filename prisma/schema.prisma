@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("TENANT")
+  propertyId   String?
+  createdAt    DateTime @default(now())
+
+  ownedProperties     Property[]
+  maintenanceRequests MaintenanceRequest[]
+  assignedProperty    Property?            @relation("TenantProperty", fields: [propertyId], references: [id])
+}
+
+model Property {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  ownerId   String
+  createdAt DateTime @default(now())
+
+  owner               User                 @relation(fields: [ownerId], references: [id])
+  tenants             User[]               @relation("TenantProperty")
+  maintenanceRequests MaintenanceRequest[]
+  rentPayments        RentPayment[]
+}
+
+model MaintenanceRequest {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  status      String   @default("OPEN")
+  propertyId  String
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  property  Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdBy User     @relation(fields: [createdById], references: [id])
+}
+
+model RentPayment {
+  id         String    @id @default(cuid())
+  propertyId String
+  amount     Float     @default(0)
+  dueDate    DateTime
+  status     String    @default("PENDING")
+  paidDate   DateTime?
+  createdAt  DateTime  @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}

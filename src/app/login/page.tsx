@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -14,15 +15,15 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [serverError, setServerError] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSignIn = async (e: { preventDefault(): void }) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setServerError("");
+    setError("");
 
     const result = await signIn("credentials", {
-      email: email.trim().toLowerCase(),
+      email,
       password,
       redirect: false,
     });
@@ -162,18 +163,26 @@ export default function LoginPage() {
             <div className="my-6 flex items-center gap-3">
               <div className="flex-1 border-t border-slate-300"></div>
               <span className="text-xs font-medium text-slate-500 uppercase">
-                or
+                demo accounts
               </span>
               <div className="flex-1 border-t border-slate-300"></div>
             </div>
 
-            {/* Social Login Buttons */}
+            {/* Demo Login Buttons */}
             <div className="space-y-3">
-              <button className="w-full rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition duration-300 hover:bg-slate-50 active:scale-95 shadow-sm">
-                Continue with Google
+              <button
+                type="button"
+                onClick={() => { setEmail("landlord@demo.com"); setPassword("password123"); }}
+                className="w-full rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition duration-300 hover:bg-slate-50 active:scale-95 shadow-sm"
+              >
+                Login as Landlord
               </button>
-              <button className="w-full rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition duration-300 hover:bg-slate-50 active:scale-95 shadow-sm">
-                Continue with Facebook
+              <button
+                type="button"
+                onClick={() => { setEmail("tenant@demo.com"); setPassword("password123"); }}
+                className="w-full rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition duration-300 hover:bg-slate-50 active:scale-95 shadow-sm"
+              >
+                Login as Tenant
               </button>
             </div>
 

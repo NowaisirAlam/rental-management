@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, ChevronDown, Eye, EyeOff, X } from "lucide-react";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 
 // ── Types ──────────────────────────────────────────────────────────────────────

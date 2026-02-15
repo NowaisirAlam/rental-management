@@ -1,32 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 
-type PayStatus = "Paid" | "Pending" | "Overdue";
+type PaymentStatus = "PENDING" | "PAID" | "LATE";
+type DisplayStatus = "Paid" | "Pending" | "Overdue";
 
-type Payment = {
-  id: number;
-  tenant: string;
-  unit: string;
-  property: string;
-  amount: string;
+type ApiPayment = {
+  id: string;
+  propertyId: string;
+  amount: number;
   dueDate: string;
-  status: PayStatus;
+  status: PaymentStatus;
+  paidDate: string | null;
+  createdAt: string;
+  property: { name: string; tenants: { name: string; email: string }[] };
 };
 
-const ALL_PAYMENTS: Payment[] = [
-  { id: 1,  tenant: "Marcus Reid",    unit: "Unit 2A", property: "Maplewood Residences", amount: "$1,800", dueDate: "Feb 1, 2026",  status: "Paid"    },
-  { id: 2,  tenant: "Priya Sharma",   unit: "Unit 3C", property: "Maplewood Residences", amount: "$2,200", dueDate: "Feb 1, 2026",  status: "Paid"    },
-  { id: 3,  tenant: "Tom Eriksson",   unit: "Unit 1B", property: "Oakview Apartments",   amount: "$1,400", dueDate: "Feb 1, 2026",  status: "Pending" },
-  { id: 4,  tenant: "Lena Kowalski",  unit: "Unit 4D", property: "Oakview Apartments",   amount: "$1,400", dueDate: "Jan 1, 2026",  status: "Overdue" },
-  { id: 5,  tenant: "Ahmed Siddiqui", unit: "Unit 5A", property: "Maplewood Residences", amount: "$1,600", dueDate: "Feb 1, 2026",  status: "Paid"    },
-  { id: 6,  tenant: "Sofia Moretti",  unit: "Unit 6B", property: "Maplewood Residences", amount: "$1,750", dueDate: "Feb 1, 2026",  status: "Paid"    },
-  { id: 7,  tenant: "Jake Park",      unit: "Unit 2C", property: "Oakview Apartments",   amount: "$1,300", dueDate: "Feb 1, 2026",  status: "Pending" },
-  { id: 8,  tenant: "Nadia Khalil",   unit: "Unit 7A", property: "Maplewood Residences", amount: "$2,100", dueDate: "Jan 1, 2026",  status: "Overdue" },
-];
-
-const statusConfig: Record<PayStatus, string> = {
+const statusConfig: Record<DisplayStatus, string> = {
   Paid:    "bg-green-100 text-green-700",
   Pending: "bg-amber-100 text-amber-700",
   Overdue: "bg-red-100 text-red-700",
@@ -35,24 +26,111 @@ const statusConfig: Record<PayStatus, string> = {
 const selectClass = "appearance-none rounded-lg border border-slate-300 bg-white pl-3 pr-8 py-2 text-sm text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
 
 export default function LandlordPayments() {
+  const [payments, setPayments] = useState<ApiPayment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filterProperty, setFilterProperty] = useState("All");
-  const [filterStatus,   setFilterStatus]   = useState("All");
-  const [filterMonth,    setFilterMonth]     = useState("All");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [filterMonth, setFilterMonth] = useState("All");
+  const [markingPaid, setMarkingPaid] = useState<string | null>(null);
 
-  const properties = ["All", "Maplewood Residences", "Oakview Apartments"];
-  const statuses   = ["All", "Paid", "Pending", "Overdue"];
-  const months     = ["All", "January 2026", "February 2026"];
+  useEffect(() => {
+    fetchPayments();
+  }, []);
 
-  const filtered = ALL_PAYMENTS.filter((p) => {
-    if (filterProperty !== "All" && p.property !== filterProperty) return false;
-    if (filterStatus   !== "All" && p.status   !== filterStatus)   return false;
+  async function fetchPayments() {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/payments");
+      if (!res.ok) throw new Error("Failed to fetch payments");
+      const data = await res.json();
+      setPayments(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function markAsPaid(id: string) {
+    setMarkingPaid(id);
+    try {
+      const res = await fetch(`/api/payments/${id}`, { method: "PUT" });
+      if (!res.ok) throw new Error("Failed to mark payment as paid");
+      await fetchPayments();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to update payment");
+    } finally {
+      setMarkingPaid(null);
+    }
+  }
+
+  function mapStatus(status: PaymentStatus): DisplayStatus {
+    if (status === "PAID") return "Paid";
+    if (status === "PENDING") return "Pending";
+    return "Overdue";
+  }
+
+  function formatDate(isoDate: string): string {
+    const date = new Date(isoDate);
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  function getMonthYear(isoDate: string): string {
+    const date = new Date(isoDate);
+    return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  }
+
+  const properties = ["All", ...Array.from(new Set(payments.map(p => p.property.name)))];
+  const statuses = ["All", "Paid", "Pending", "Overdue"];
+  const months = ["All", ...Array.from(new Set(payments.map(p => getMonthYear(p.dueDate))))];
+
+  const filtered = payments.filter((p) => {
+    if (filterProperty !== "All" && p.property.name !== filterProperty) return false;
+    if (filterStatus !== "All" && mapStatus(p.status) !== filterStatus) return false;
+    if (filterMonth !== "All" && getMonthYear(p.dueDate) !== filterMonth) return false;
     return true;
   });
 
-  const total   = filtered.reduce((s, p) => s + parseInt(p.amount.replace(/\D/g, "")), 0);
-  const paid    = filtered.filter((p) => p.status === "Paid").length;
-  const pending = filtered.filter((p) => p.status === "Pending").length;
-  const overdue = filtered.filter((p) => p.status === "Overdue").length;
+  const total = filtered.reduce((s, p) => s + p.amount, 0);
+  const paid = filtered.filter((p) => p.status === "PAID").length;
+  const pending = filtered.filter((p) => p.status === "PENDING").length;
+  const overdue = filtered.filter((p) => p.status === "LATE").length;
+
+  if (loading) {
+    return (
+      <div className="px-8 py-8 max-w-5xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-slate-900">Payments</h1>
+          <p className="mt-1 text-sm text-slate-500">Track rent collection across all your properties.</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-10 text-center text-slate-500">
+          Loading payments...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="px-8 py-8 max-w-5xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-slate-900">Payments</h1>
+          <p className="mt-1 text-sm text-slate-500">Track rent collection across all your properties.</p>
+        </div>
+        <div className="rounded-2xl border border-red-200 bg-red-50 shadow-sm p-10 text-center">
+          <p className="text-red-600 font-semibold">Error: {error}</p>
+          <button
+            onClick={fetchPayments}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-8 py-8 max-w-5xl mx-auto">
@@ -105,7 +183,7 @@ export default function LandlordPayments() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
-                {["Tenant", "Unit", "Property", "Amount", "Due Date", "Status"].map((h) => (
+                {["Tenant", "Property", "Amount", "Due Date", "Status", "Actions"].map((h) => (
                   <th key={h} className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
                     {h}
                   </th>
@@ -113,20 +191,37 @@ export default function LandlordPayments() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((row, i) => (
-                <tr key={row.id} className={`border-b border-slate-100 transition hover:bg-slate-50 ${i === filtered.length - 1 ? "border-b-0" : ""}`}>
-                  <td className="px-5 py-3.5 font-medium text-slate-900">{row.tenant}</td>
-                  <td className="px-5 py-3.5 text-slate-600">{row.unit}</td>
-                  <td className="px-5 py-3.5 text-slate-600">{row.property}</td>
-                  <td className="px-5 py-3.5 font-semibold text-slate-900">{row.amount}</td>
-                  <td className="px-5 py-3.5 text-slate-500">{row.dueDate}</td>
-                  <td className="px-5 py-3.5">
-                    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusConfig[row.status]}`}>
-                      {row.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {filtered.map((row, i) => {
+                const displayStatus = mapStatus(row.status);
+                const tenantName = row.property.tenants[0]?.name ?? "No tenant";
+                const canMarkPaid = row.status === "PENDING" || row.status === "LATE";
+                const isMarking = markingPaid === row.id;
+
+                return (
+                  <tr key={row.id} className={`border-b border-slate-100 transition hover:bg-slate-50 ${i === filtered.length - 1 ? "border-b-0" : ""}`}>
+                    <td className="px-5 py-3.5 font-medium text-slate-900">{tenantName}</td>
+                    <td className="px-5 py-3.5 text-slate-600">{row.property.name}</td>
+                    <td className="px-5 py-3.5 font-semibold text-slate-900">${row.amount.toLocaleString()}</td>
+                    <td className="px-5 py-3.5 text-slate-500">{formatDate(row.dueDate)}</td>
+                    <td className="px-5 py-3.5">
+                      <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusConfig[displayStatus]}`}>
+                        {displayStatus}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      {canMarkPaid && (
+                        <button
+                          onClick={() => markAsPaid(row.id)}
+                          disabled={isMarking}
+                          className="px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isMarking ? "Marking..." : "Mark Paid"}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
               {filtered.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-5 py-10 text-center text-sm text-slate-400">
