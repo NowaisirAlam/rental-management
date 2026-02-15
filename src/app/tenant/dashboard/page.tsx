@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import {
   CreditCard,
   Calendar,
@@ -74,15 +75,17 @@ function Badge({ label, className }: { label: string; className: string }) {
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
+  const { data: session } = useSession();
+  const displayName = session?.user?.name?.trim() || "there";
   const statusCfg = statusConfig[rentInfo.status];
   const StatusIcon = statusCfg.icon;
 
   return (
-    <div className="px-8 py-8 max-w-5xl mx-auto">
+    <div className="mx-auto w-full max-w-[1280px] px-6 py-8 lg:px-10">
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Welcome back, {displayName}</h1>
         <p className="mt-1 text-sm text-slate-500">
           {tenant.unit} &middot; {tenant.building}
         </p>

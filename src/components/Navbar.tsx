@@ -8,7 +8,7 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const isLoginPage = pathname === "/login";
+  const isLoginPage = pathname === "/login" || pathname.startsWith("/register");
 
   return (
     <nav className="border-b border-slate-200 bg-white w-full">

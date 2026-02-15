@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import {
   DollarSign,
   Clock,
@@ -131,13 +132,15 @@ export default function LandlordDashboard() {
 
   const { stats, recentPayments, recentMaintenance } = data;
   const userName = session?.user?.name?.split(" ")[0] ?? "there";
+  const displayName = session?.user?.name?.trim() || "there";
 
   return (
-    <div className="px-8 py-8 max-w-5xl mx-auto">
+    <div className="mx-auto w-full max-w-[1280px] px-6 py-8 lg:px-10">
 
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">Welcome back, {userName}</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Welcome back, {displayName}</h1>
         <p className="mt-1 text-sm text-slate-500">
           Here&apos;s an overview of your properties for {new Date().toLocaleString("en-US", { month: "long", year: "numeric" })}.
         </p>
