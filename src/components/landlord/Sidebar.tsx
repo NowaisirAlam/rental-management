@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import {
   Building2,
   LayoutDashboard,
@@ -123,13 +124,10 @@ function LogoutModal({ onCancel, onConfirm }: { onCancel: () => void; onConfirm:
 
 export default function LandlordSidebar() {
   const pathname = usePathname();
-  const router   = useRouter();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogoutConfirm = () => {
-    localStorage.removeItem("role");
-    localStorage.removeItem("landlordOnboarded");
-    router.push("/");
+    signOut({ callbackUrl: "/login" });
   };
 
   return (
