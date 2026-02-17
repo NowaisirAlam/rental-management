@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { signIn, getSession } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 
 export default function LoginPage() {
@@ -28,20 +29,16 @@ export default function LoginPage() {
     });
 
     if (result?.error) {
-      setError("Invalid email or password");
+      setServerError("Invalid email or password. Please try again.");
       setIsLoading(false);
       return;
     }
 
-    // Fetch session to get role for redirect
-    const res = await fetch("/api/auth/session");
-    const session = await res.json();
-    const role = session?.user?.role;
-
-    if (role === "LANDLORD") {
-      router.push("/landlord/dashboard");
-    } else if (role === "TENANT") {
+    const session = await getSession();
+    if (session?.user?.role === "TENANT") {
       router.push("/tenant/dashboard");
+    } else if (session?.user?.role === "LANDLORD") {
+      router.push("/landlord/dashboard");
     } else {
       router.push("/");
     }
@@ -66,10 +63,10 @@ export default function LoginPage() {
               </p>
             </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-                {error}
+            {/* Server error banner */}
+            {serverError && (
+              <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {serverError}
               </div>
             )}
 

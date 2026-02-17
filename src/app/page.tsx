@@ -11,8 +11,6 @@ import {
   Clock,
   ChevronRight,
 } from "lucide-react";
-import DevPreviewButton from "@/components/DevPreviewButton";
-import LandlordPreviewButton from "@/components/LandlordPreviewButton";
 
 export default function Home() {
   return (
@@ -53,8 +51,6 @@ export default function Home() {
             >
               Get Started
             </a>
-            <DevPreviewButton />
-            <LandlordPreviewButton />
           </div>
         </div>
       </nav>

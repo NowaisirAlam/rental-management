@@ -1,32 +1,31 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import {
   CreditCard,
   Calendar,
   Clock,
   Wrench,
+  Bell,
   ArrowRight,
   CheckCircle2,
   AlertCircle,
-  Loader2,
+  CircleDot,
 } from "lucide-react";
 
-// ── DB status → display status ──────────────────────────────────────────────
+// ── Dummy data ─────────────────────────────────────────────────────────────────
 
-const dbToDisplay: Record<string, string> = {
-  OPEN: "Submitted",
-  IN_PROGRESS: "In Progress",
-  RESOLVED: "Completed",
-  CLOSED: "Completed",
-};
+const tenant = { name: "Sarah Johnson", unit: "Unit 4B", building: "Maplewood Residences" };
 
-const maintenanceStatusConfig: Record<string, string> = {
-  "Submitted":   "bg-blue-100  text-blue-700",
-  "In Progress": "bg-amber-100 text-amber-700",
-  "Completed":   "bg-green-100 text-green-700",
-};
+const rentInfo = { amount: 1850, dueDate: "Feb 1, 2026", daysUntilDue: 3, status: "Due Soon" as const };
+
+const leaseEnd = "Aug 31, 2026";
+
+const maintenanceRequests = [
+  { id: 1, title: "Kitchen faucet dripping",   status: "In Progress", date: "Jan 28, 2026" },
+  { id: 2, title: "Bathroom light flickering", status: "Submitted",   date: "Jan 30, 2026" },
+];
 
 const announcements = [
   {
@@ -45,6 +44,20 @@ const announcements = [
   },
 ];
 
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+const statusConfig = {
+  "Paid":      { color: "bg-green-100 text-green-700",  icon: CheckCircle2 },
+  "Due Soon":  { color: "bg-amber-100 text-amber-700",  icon: Clock        },
+  "Overdue":   { color: "bg-red-100   text-red-700",    icon: AlertCircle  },
+};
+
+const maintenanceStatusConfig: Record<string, string> = {
+  "Submitted":   "bg-blue-100  text-blue-700",
+  "In Progress": "bg-amber-100 text-amber-700",
+  "Completed":   "bg-green-100 text-green-700",
+};
+
 const priorityConfig: Record<string, string> = {
   warning: "bg-amber-100 text-amber-700",
   info:    "bg-blue-100  text-blue-700",
@@ -59,81 +72,22 @@ function Badge({ label, className }: { label: string; className: string }) {
   );
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function getRentStatus(dueDate: string | null, status: string | null) {
-  if (status === "PAID") return "Paid" as const;
-  if (!dueDate) return "Due Soon" as const;
-  const diff = Math.ceil((new Date(dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-  if (diff < 0) return "Overdue" as const;
-  return "Due Soon" as const;
-}
-
-const statusConfig = {
-  "Paid":     { color: "bg-green-100 text-green-700", icon: CheckCircle2 },
-  "Due Soon": { color: "bg-amber-100 text-amber-700", icon: Clock },
-  "Overdue":  { color: "bg-red-100   text-red-700",   icon: AlertCircle },
-};
-
-// ── Page ────────────────────────────────────────────────────────────────────
+// ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch("/api/dashboard")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load dashboard");
-        return res.json();
-      })
-      .then(setData)
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full py-32">
-        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-        <span className="ml-2 text-sm text-slate-500">Loading dashboard...</span>
-      </div>
-    );
-  }
-
-  if (error || !data) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full py-32">
-        <p className="text-sm text-red-600 mb-3">{error ?? "Failed to load"}</p>
-        <button onClick={() => window.location.reload()} className="text-sm text-blue-600 hover:underline">Retry</button>
-      </div>
-    );
-  }
-
-  const { stats, recentMaintenance } = data;
-  const rentStatus = getRentStatus(stats.rentDueDate, stats.rentStatus);
-  const statusCfg = statusConfig[rentStatus];
+  const { data: session } = useSession();
+  const displayName = session?.user?.name?.trim() || "there";
+  const statusCfg = statusConfig[rentInfo.status];
   const StatusIcon = statusCfg.icon;
 
-  const dueDate = stats.rentDueDate
-    ? new Date(stats.rentDueDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-    : "N/A";
-
-  const daysUntilDue = stats.rentDueDate
-    ? Math.ceil((new Date(stats.rentDueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    : 0;
-
   return (
-    <div className="px-8 py-8 max-w-5xl mx-auto">
+    <div className="mx-auto w-full max-w-[1280px] px-6 py-8 lg:px-10">
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Welcome back, {displayName}</h1>
         <p className="mt-1 text-sm text-slate-500">
-          {stats.propertyName ?? "No property assigned"}
-          {stats.propertyAddress ? ` · ${stats.propertyAddress}` : ""}
+          {tenant.unit} &middot; {tenant.building}
         </p>
       </div>
 
@@ -146,11 +100,11 @@ export default function DashboardPage() {
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Rent Due</p>
             <CreditCard className="h-4 w-4 text-slate-400" />
           </div>
-          <p className="mt-3 text-3xl font-extrabold text-slate-900">${(stats.rentAmount ?? 0).toLocaleString()}</p>
+          <p className="mt-3 text-3xl font-extrabold text-slate-900">${rentInfo.amount.toLocaleString()}</p>
           <div className="mt-2 flex items-center gap-1.5">
             <StatusIcon className="h-3.5 w-3.5" />
             <span className={`text-xs font-semibold ${statusCfg.color.split(" ")[1]}`}>
-              {rentStatus}
+              {rentInfo.status}
             </span>
           </div>
         </div>
@@ -161,10 +115,8 @@ export default function DashboardPage() {
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Due Date</p>
             <Calendar className="h-4 w-4 text-slate-400" />
           </div>
-          <p className="mt-3 text-xl font-bold text-slate-900">{dueDate}</p>
-          <p className="mt-1 text-xs text-slate-500">
-            {daysUntilDue > 0 ? `${daysUntilDue} days away` : daysUntilDue === 0 ? "Due today" : `${Math.abs(daysUntilDue)} days overdue`}
-          </p>
+          <p className="mt-3 text-xl font-bold text-slate-900">{rentInfo.dueDate}</p>
+          <p className="mt-1 text-xs text-slate-500">{rentInfo.daysUntilDue} days away</p>
         </div>
 
         {/* Lease Ends */}
@@ -173,8 +125,8 @@ export default function DashboardPage() {
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Lease Ends</p>
             <Clock className="h-4 w-4 text-slate-400" />
           </div>
-          <p className="mt-3 text-xl font-bold text-slate-900">—</p>
-          <p className="mt-1 text-xs text-slate-500">Not available</p>
+          <p className="mt-3 text-xl font-bold text-slate-900">{leaseEnd}</p>
+          <p className="mt-1 text-xs text-slate-500">Fixed-term</p>
         </div>
 
         {/* Open Requests */}
@@ -183,7 +135,7 @@ export default function DashboardPage() {
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Maintenance</p>
             <Wrench className="h-4 w-4 text-slate-400" />
           </div>
-          <p className="mt-3 text-3xl font-extrabold text-slate-900">{stats.openMaintenance ?? 0}</p>
+          <p className="mt-3 text-3xl font-extrabold text-slate-900">{maintenanceRequests.length}</p>
           <p className="mt-1 text-xs text-slate-500">Open requests</p>
         </div>
 
@@ -226,28 +178,19 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="space-y-3">
-            {(!recentMaintenance || recentMaintenance.length === 0) && (
-              <p className="text-sm text-slate-400 text-center py-4">No maintenance requests yet.</p>
-            )}
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {recentMaintenance?.map((req: any) => {
-              const displayStatus = dbToDisplay[req.status] ?? req.status;
-              return (
-                <div key={req.id} className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
-                  <div>
-                    <p className="text-sm font-medium text-slate-800">{req.title}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      {new Date(req.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                    </p>
-                  </div>
-                  <Badge label={displayStatus} className={maintenanceStatusConfig[displayStatus] ?? "bg-slate-100 text-slate-600"} />
+            {maintenanceRequests.map((req) => (
+              <div key={req.id} className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-slate-800">{req.title}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{req.date}</p>
                 </div>
-              );
-            })}
+                <Badge label={req.status} className={maintenanceStatusConfig[req.status]} />
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Announcements (static for now) */}
+        {/* Announcements */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-700">Announcements</h2>

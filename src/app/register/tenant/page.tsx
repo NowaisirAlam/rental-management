@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, X } from "lucide-react";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import Navbar from "@/components/Navbar";
@@ -15,7 +15,11 @@ type FormFields = {
   phone: string;
   password: string;
   confirmPassword: string;
-  unitNumber: string;
+  apartmentOrUnitNumber: string;
+  buildingOrInvitationCode: string;
+  moveInDate: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
   agreeToTerms: boolean;
 };
 
@@ -50,9 +54,22 @@ function validate(fields: FormFields): Record<string, string> {
     errs.confirmPassword = "Passwords do not match.";
   }
 
-  if (!fields.unitNumber.trim()) errs.unitNumber = "Apartment/Unit number is required.";
+  if (!fields.apartmentOrUnitNumber.trim())
+    errs.apartmentOrUnitNumber = "Apartment / Unit number is required.";
 
-  if (!fields.agreeToTerms) errs.agreeToTerms = "You must agree to the Terms & Privacy Policy.";
+  if (!fields.buildingOrInvitationCode.trim())
+    errs.buildingOrInvitationCode = "Building / Invitation code is required.";
+
+  if (!fields.moveInDate.trim()) errs.moveInDate = "Move-in date is required.";
+
+  if (!fields.emergencyContactName.trim())
+    errs.emergencyContactName = "Emergency contact name is required.";
+
+  if (!fields.emergencyContactPhone.trim())
+    errs.emergencyContactPhone = "Emergency contact phone is required.";
+
+  if (!fields.agreeToTerms)
+    errs.agreeToTerms = "You must agree to the Terms & Privacy Policy.";
 
   return errs;
 }
@@ -68,11 +85,11 @@ export default function TenantRegisterPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [unitNumber, setUnitNumber] = useState("");
-  const [propertyCode, setPropertyCode] = useState("");
+  const [apartmentOrUnitNumber, setApartmentOrUnitNumber] = useState("");
+  const [buildingOrInvitationCode, setBuildingOrInvitationCode] = useState("");
   const [moveInDate, setMoveInDate] = useState("");
-  const [emergencyName, setEmergencyName] = useState("");
-  const [emergencyPhone, setEmergencyPhone] = useState("");
+  const [emergencyContactName, setEmergencyContactName] = useState("");
+  const [emergencyContactPhone, setEmergencyContactPhone] = useState("");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
 
   // UI state
@@ -80,17 +97,19 @@ export default function TenantRegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [serverError, setServerError] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Validation state
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Helper: current field values for validate()
   const currentFields = (): FormFields => ({
-    fullName, email, phone, password, confirmPassword, unitNumber, agreeToTerms,
+    fullName, email, phone, password, confirmPassword,
+    apartmentOrUnitNumber, buildingOrInvitationCode, moveInDate,
+    emergencyContactName, emergencyContactPhone, agreeToTerms,
   });
 
-  // Show error only when field has been touched or form was submitted
   const showError = (field: string) =>
     (touched[field] || submitted) ? errors[field] : undefined;
 
@@ -99,53 +118,41 @@ export default function TenantRegisterPage() {
     setErrors(validate(currentFields()));
   };
 
-  const [apiError, setApiError] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: { preventDefault(): void }) => {
     e.preventDefault();
     setSubmitted(true);
-    setApiError("");
+    setServerError("");
     const errs = validate(currentFields());
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
     setIsLoading(true);
-    try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: fullName,
-          email,
-          password,
-          role: "TENANT",
-        }),
-      });
 
-      if (!res.ok) {
-        const data = await res.json();
-        setApiError(data.error || "Registration failed");
-        setIsLoading(false);
-        return;
+    const res = await fetch("/api/auth/register/tenant", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fullName, email, phone, password, confirmPassword,
+        apartmentOrUnitNumber, buildingOrInvitationCode, moveInDate,
+        emergencyContactName, emergencyContactPhone, agreeToTerms,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (data.errors) {
+        setErrors(data.errors);
+        if (data.errors.server) setServerError(data.errors.server);
+      } else {
+        setServerError("Registration failed. Please try again.");
       }
-
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setApiError("Account created but login failed. Please log in manually.");
-        setIsLoading(false);
-        return;
-      }
-
-      router.push("/tenant/dashboard");
-    } catch {
-      setApiError("Something went wrong. Please try again.");
       setIsLoading(false);
+      return;
     }
+
+    setIsLoading(false);
+    setShowSuccessModal(true);
   };
 
   // Shared Tailwind helpers
@@ -185,6 +192,13 @@ export default function TenantRegisterPage() {
             <p className="mt-2 text-sm text-slate-600">
               Fill in your details below to get started with PropManager.
             </p>
+
+            {/* Server error banner */}
+            {serverError && (
+              <div className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {serverError}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} noValidate>
 
@@ -315,86 +329,98 @@ export default function TenantRegisterPage() {
 
               <div className="mt-5 grid gap-4 md:grid-cols-2">
 
-                {/* Unit Number */}
+                {/* Apartment / Unit Number */}
                 <div>
-                  <label htmlFor="unitNumber" className="block text-sm font-medium text-slate-700">
+                  <label htmlFor="apartmentOrUnitNumber" className="block text-sm font-medium text-slate-700">
                     Apartment / Unit Number
                   </label>
                   <input
-                    id="unitNumber"
+                    id="apartmentOrUnitNumber"
                     type="text"
-                    value={unitNumber}
-                    onChange={(e) => setUnitNumber(e.target.value)}
-                    onBlur={() => handleBlur("unitNumber")}
+                    value={apartmentOrUnitNumber}
+                    onChange={(e) => setApartmentOrUnitNumber(e.target.value)}
+                    onBlur={() => handleBlur("apartmentOrUnitNumber")}
                     placeholder="e.g. 4B"
-                    className={inputClass("unitNumber")}
+                    className={inputClass("apartmentOrUnitNumber")}
                   />
-                  {showError("unitNumber") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.unitNumber}</p>
+                  {showError("apartmentOrUnitNumber") && (
+                    <p className="mt-1 text-xs text-red-500">{errors.apartmentOrUnitNumber}</p>
                   )}
                 </div>
 
-                {/* Property Code */}
+                {/* Building / Invitation Code */}
                 <div>
-                  <label htmlFor="propertyCode" className="block text-sm font-medium text-slate-700">
-                    Building / Invitation Code{" "}
-                    <span className="font-normal text-slate-400">(optional)</span>
+                  <label htmlFor="buildingOrInvitationCode" className="block text-sm font-medium text-slate-700">
+                    Building / Invitation Code
                   </label>
                   <input
-                    id="propertyCode"
+                    id="buildingOrInvitationCode"
                     type="text"
-                    value={propertyCode}
-                    onChange={(e) => setPropertyCode(e.target.value)}
+                    value={buildingOrInvitationCode}
+                    onChange={(e) => setBuildingOrInvitationCode(e.target.value)}
+                    onBlur={() => handleBlur("buildingOrInvitationCode")}
                     placeholder="Provided by your landlord"
-                    className={`${inputBase} ${inputDefault}`}
+                    className={inputClass("buildingOrInvitationCode")}
                   />
+                  {showError("buildingOrInvitationCode") && (
+                    <p className="mt-1 text-xs text-red-500">{errors.buildingOrInvitationCode}</p>
+                  )}
                 </div>
 
                 {/* Move-in Date */}
                 <div>
                   <label htmlFor="moveInDate" className="block text-sm font-medium text-slate-700">
-                    Move-in Date{" "}
-                    <span className="font-normal text-slate-400">(optional)</span>
+                    Move-in Date
                   </label>
                   <input
                     id="moveInDate"
                     type="date"
                     value={moveInDate}
                     onChange={(e) => setMoveInDate(e.target.value)}
-                    className={`${inputBase} ${inputDefault}`}
+                    onBlur={() => handleBlur("moveInDate")}
+                    className={inputClass("moveInDate")}
                   />
+                  {showError("moveInDate") && (
+                    <p className="mt-1 text-xs text-red-500">{errors.moveInDate}</p>
+                  )}
                 </div>
 
                 {/* Emergency Contact Name */}
                 <div>
-                  <label htmlFor="emergencyName" className="block text-sm font-medium text-slate-700">
-                    Emergency Contact Name{" "}
-                    <span className="font-normal text-slate-400">(optional)</span>
+                  <label htmlFor="emergencyContactName" className="block text-sm font-medium text-slate-700">
+                    Emergency Contact Name
                   </label>
                   <input
-                    id="emergencyName"
+                    id="emergencyContactName"
                     type="text"
-                    value={emergencyName}
-                    onChange={(e) => setEmergencyName(e.target.value)}
+                    value={emergencyContactName}
+                    onChange={(e) => setEmergencyContactName(e.target.value)}
+                    onBlur={() => handleBlur("emergencyContactName")}
                     placeholder="e.g. John Smith"
-                    className={`${inputBase} ${inputDefault}`}
+                    className={inputClass("emergencyContactName")}
                   />
+                  {showError("emergencyContactName") && (
+                    <p className="mt-1 text-xs text-red-500">{errors.emergencyContactName}</p>
+                  )}
                 </div>
 
                 {/* Emergency Contact Phone */}
                 <div className="md:col-span-2">
-                  <label htmlFor="emergencyPhone" className="block text-sm font-medium text-slate-700">
-                    Emergency Contact Phone{" "}
-                    <span className="font-normal text-slate-400">(optional)</span>
+                  <label htmlFor="emergencyContactPhone" className="block text-sm font-medium text-slate-700">
+                    Emergency Contact Phone
                   </label>
                   <input
-                    id="emergencyPhone"
+                    id="emergencyContactPhone"
                     type="tel"
-                    value={emergencyPhone}
-                    onChange={(e) => setEmergencyPhone(e.target.value)}
+                    value={emergencyContactPhone}
+                    onChange={(e) => setEmergencyContactPhone(e.target.value)}
+                    onBlur={() => handleBlur("emergencyContactPhone")}
                     placeholder="+1 (555) 000-0000"
-                    className={`${inputBase} ${inputDefault} md:max-w-xs`}
+                    className={`${inputClass("emergencyContactPhone")} md:max-w-xs`}
                   />
+                  {showError("emergencyContactPhone") && (
+                    <p className="mt-1 text-xs text-red-500">{errors.emergencyContactPhone}</p>
+                  )}
                 </div>
 
               </div>
@@ -456,6 +482,40 @@ export default function TenantRegisterPage() {
           </div>
         </div>
       </main>
+
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="relative z-10 w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setShowSuccessModal(false)}
+              className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+              aria-label="Close popup"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <div className="flex items-start gap-4">
+              <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-100">
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Account successfully created</h3>
+                <p className="mt-1.5 text-sm text-slate-500">
+                  Your tenant account is ready. Continue to login.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => router.push("/login")}
+              className="mt-6 w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+            >
+              Go to Login
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ChevronDown,
   Paperclip,
@@ -15,83 +15,49 @@ import {
 } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
-type Status = "Submitted" | "In Progress" | "Completed";
 
-type Request = {
-  id: string;              // DB id (text)
-  title: string;           // derived from description
-  type: string;            // UI-only for now
-  urgency: string;         // UI-only for now
-  status: Status;          // from DB (or default)
-  date: string;            // derived from createdAt
-  description: string;     // from DB
-};
-
-type ApiMaintenance = {
-  id: string;
-  title?: string | null;
+type Status   = "Submitted" | "In Progress" | "Completed";
+type Request  = {
+  id:          number;
+  title:       string;
+  type:        string;
+  urgency:     string;
+  status:      Status;
+  date:        string;
   description: string;
-  status?: string | null;
-  createdAt?: string | number | null;
 };
+
+// ── Dummy data ─────────────────────────────────────────────────────────────────
+
+const initialRequests: Request[] = [
+  { id: 1, title: "Kitchen faucet dripping",   type: "Plumbing",            urgency: "Medium", status: "In Progress", date: "Jan 28, 2026", description: "The kitchen faucet drips constantly even when fully turned off." },
+  { id: 2, title: "Bathroom light flickering", type: "Electrical",          urgency: "Low",    status: "Submitted",   date: "Jan 30, 2026", description: "Bathroom overhead light flickers intermittently." },
+  { id: 3, title: "Bedroom window seal gap",   type: "Structural / Windows",urgency: "Low",    status: "Completed",   date: "Jan 10, 2026", description: "Cold air was coming through the bedroom window seal." },
+];
 
 // ── Style maps ─────────────────────────────────────────────────────────────────
+
 const statusConfig: Record<string, { badge: string; bar: string }> = {
-  Submitted: { badge: "bg-blue-100  text-blue-700", bar: "bg-blue-500" },
+  "Submitted":   { badge: "bg-blue-100  text-blue-700",  bar: "bg-blue-500"  },
   "In Progress": { badge: "bg-amber-100 text-amber-700", bar: "bg-amber-500" },
-  Completed: { badge: "bg-green-100 text-green-700", bar: "bg-green-500" },
+  "Completed":   { badge: "bg-green-100 text-green-700", bar: "bg-green-500" },
 };
 
 const urgencyConfig: Record<string, string> = {
-  Low: "bg-slate-100  text-slate-600",
-  Medium: "bg-amber-100  text-amber-700",
-  High: "bg-orange-100 text-orange-700",
-  Emergency: "bg-red-100    text-red-700",
+  "Low":       "bg-slate-100  text-slate-600",
+  "Medium":    "bg-amber-100  text-amber-700",
+  "High":      "bg-orange-100 text-orange-700",
+  "Emergency": "bg-red-100    text-red-700",
 };
 
 const progressWidth: Record<Status, string> = {
-  Submitted: "20%",
+  "Submitted":   "20%",
   "In Progress": "60%",
-  Completed: "100%",
+  "Completed":   "100%",
 };
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
-function toUiStatus(s?: string | null): Status {
-  const v = (s ?? "").toLowerCase();
-  if (v.includes("progress")) return "In Progress";
-  if (v.includes("complete")) return "Completed";
-  return "Submitted";
-}
-
-function formatDate(input?: string | number | null) {
-  try {
-    const d = input ? new Date(input) : new Date();
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  } catch {
-    return new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  }
-}
-
-function deriveTitle(desc: string) {
-  const clean = (desc ?? "").trim();
-  if (!clean) return "Maintenance request";
-  return clean.slice(0, 50) + (clean.length > 50 ? "…" : "");
-}
-
-function mapApiToUi(item: ApiMaintenance): Request {
-  const titleFromApi = (item.title ?? "").trim();
-  return {
-    id: item.id,
-    title: titleFromApi ? titleFromApi : deriveTitle(item.description ?? ""),
-    type: "Other",
-    urgency: "Medium",
-    status: toUiStatus(item.status),
-    date: formatDate(item.createdAt ?? null),
-    description: item.description ?? "",
-  };
-}
-
 // ── Toast ──────────────────────────────────────────────────────────────────────
+
 function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl bg-slate-900 px-5 py-3 text-white shadow-xl">
@@ -105,6 +71,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 }
 
 // ── Actions dropdown ───────────────────────────────────────────────────────────
+
 function ActionsMenu({
   onView, onEdit, onDelete,
 }: {
@@ -115,6 +82,7 @@ function ActionsMenu({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
+  // Close on outside click
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -124,6 +92,7 @@ function ActionsMenu({
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
+  // Close on Esc
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
@@ -131,8 +100,7 @@ function ActionsMenu({
     return () => document.removeEventListener("keydown", handler);
   }, [open]);
 
-  const item =
-    "flex w-full items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors rounded-lg";
+  const item = "flex w-full items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors rounded-lg";
 
   return (
     <div ref={ref} className="relative flex-shrink-0">
@@ -147,7 +115,7 @@ function ActionsMenu({
       {open && (
         <div className="absolute right-0 top-9 z-30 w-44 rounded-xl border border-slate-200 bg-white p-1 shadow-lg">
           <button className={item} onClick={() => { setOpen(false); onView(); }}>
-            <Eye className="h-4 w-4 text-slate-400" /> View request
+            <Eye    className="h-4 w-4 text-slate-400" /> View request
           </button>
           <button className={item} onClick={() => { setOpen(false); onEdit(); }}>
             <Pencil className="h-4 w-4 text-slate-400" /> Edit request
@@ -166,13 +134,17 @@ function ActionsMenu({
 }
 
 // ── View modal ─────────────────────────────────────────────────────────────────
+
 function ViewModal({
-  req, onClose, onEdit,
+  req,
+  onClose,
+  onEdit,
 }: {
   req: Request;
   onClose: () => void;
   onEdit: () => void;
 }) {
+  // Close on Esc
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", handler);
@@ -190,8 +162,12 @@ function ViewModal({
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Panel */}
       <div className="relative z-50 w-full max-w-lg rounded-2xl bg-white shadow-2xl">
+        {/* Header */}
         <div className="flex items-start justify-between gap-4 p-6 pb-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">Maintenance Request</p>
@@ -205,6 +181,7 @@ function ViewModal({
           </button>
         </div>
 
+        {/* Details */}
         <div className="px-6 pb-2">
           {row("Status",
             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${cfg.badge}`}>
@@ -212,15 +189,16 @@ function ViewModal({
             </span>
           )}
           {row("Urgency",
-            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${urgencyConfig[req.urgency] || urgencyConfig.Medium}`}>
+            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${urgencyConfig[req.urgency]}`}>
               {req.urgency}
             </span>
           )}
-          {row("Category", req.type)}
-          {row("Submitted", req.date)}
+          {row("Category",    req.type)}
+          {row("Submitted",   req.date)}
           {row("Description", <span className="leading-relaxed">{req.description}</span>)}
         </div>
 
+        {/* Footer */}
         <div className="flex items-center justify-end gap-3 border-t border-slate-100 px-6 py-4">
           <button
             onClick={onClose}
@@ -241,7 +219,14 @@ function ViewModal({
 }
 
 // ── Confirm delete modal ───────────────────────────────────────────────────────
-function ConfirmDeleteModal({ onCancel, onConfirm }: { onCancel: () => void; onConfirm: () => void }) {
+
+function ConfirmDeleteModal({
+  onCancel,
+  onConfirm,
+}: {
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onCancel(); };
     document.addEventListener("keydown", handler);
@@ -283,55 +268,36 @@ function ConfirmDeleteModal({ onCancel, onConfirm }: { onCancel: () => void; onC
 }
 
 // ── Page ───────────────────────────────────────────────────────────────────────
+
 export default function MaintenancePage() {
-  const [requests, setRequests] = useState<Request[]>([]);
-  const [toast, setToast] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [requests, setRequests]         = useState<Request[]>(initialRequests);
+  const [toast, setToast]               = useState<string | null>(null);
 
   // Form
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [issueType, setIssueType] = useState("");
-  const [urgency, setUrgency] = useState("");
-  const [description, setDescription] = useState("");
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [showForm, setShowForm]         = useState(false);
+  const [editingId, setEditingId]       = useState<number | null>(null);
+  const [issueType, setIssueType]       = useState("");
+  const [urgency, setUrgency]           = useState("");
+  const [description, setDescription]   = useState("");
+  const [fileName, setFileName]         = useState<string | null>(null);
 
   // Modals
-  const [viewReq, setViewReq] = useState<Request | null>(null);
-  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [viewReq, setViewReq]           = useState<Request | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
 
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3500);
   };
 
-  const loadRequests = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/maintenance", { cache: "no-store" });
-      const data = await res.json();
-      const list = Array.isArray(data) ? data.map(mapApiToUi) : [];
-      setRequests(list);
-    } catch (e) {
-      console.error(e);
-      showToast("Failed to load requests.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { loadRequests(); }, []);
-
+  // ── Open form for NEW request ──
   const openCreateForm = () => {
     setEditingId(null);
-    setIssueType("");
-    setUrgency("");
-    setDescription("");
-    setFileName(null);
+    setIssueType(""); setUrgency(""); setDescription(""); setFileName(null);
     setShowForm(true);
   };
 
-  // UI-only edit (DB edit not implemented here)
+  // ── Open form for EDIT ──
   const openEditForm = (req: Request) => {
     setEditingId(req.id);
     setIssueType(req.type);
@@ -339,66 +305,63 @@ export default function MaintenancePage() {
     setDescription(req.description);
     setFileName(null);
     setShowForm(true);
+    // Scroll form into view
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  // ── Save (create or update) ──
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!issueType || !urgency || !description.trim()) return;
 
-    try {
-      if (editingId) {
-        showToast("Edit not connected to DB yet (submit works).");
-      } else {
-        const title = deriveTitle(description);
-
-        const res = await fetch("/api/maintenance", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, description }),
-        });
-
-        if (!res.ok) {
-          const text = await res.text();
-          console.error("POST /api/maintenance failed:", res.status, text);
-          showToast("Submit failed (check Network → Response).");
-          return;
-        }
-
-        showToast("Maintenance request submitted successfully.");
-      }
-
-      setShowForm(false);
-      setEditingId(null);
-      setIssueType("");
-      setUrgency("");
-      setDescription("");
-      setFileName(null);
-
-      await loadRequests();
-    } catch (err) {
-      console.error(err);
-      showToast("Something went wrong.");
+    if (editingId !== null) {
+      // Update existing
+      setRequests((prev) =>
+        prev.map((r) =>
+          r.id === editingId
+            ? { ...r, type: issueType, urgency, description, title: description.slice(0, 50) + (description.length > 50 ? "…" : "") }
+            : r
+        )
+      );
+      showToast("Request updated.");
+    } else {
+      // Create new
+      const newReq: Request = {
+        id: Date.now(),
+        title: description.slice(0, 50) + (description.length > 50 ? "…" : ""),
+        type: issueType,
+        urgency,
+        status: "Submitted",
+        date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        description,
+      };
+      setRequests((prev) => [newReq, ...prev]);
+      showToast("Maintenance request submitted successfully.");
     }
+
+    setShowForm(false);
+    setEditingId(null);
+    setIssueType(""); setUrgency(""); setDescription(""); setFileName(null);
   };
 
+  // ── Confirm delete ──
   const handleDeleteConfirm = () => {
-    if (!deleteTargetId) return;
+    if (deleteTargetId === null) return;
     setRequests((prev) => prev.filter((r) => r.id !== deleteTargetId));
     setDeleteTargetId(null);
-    showToast("Deleted (UI only).");
+    showToast("Request deleted.");
   };
 
-  const selectBase =
-    "mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none";
+  const selectBase = "mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none";
 
   return (
     <div className="px-8 py-8 max-w-4xl mx-auto">
+
+      {/* Page header */}
       <div className="mb-8 flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Maintenance Requests</h1>
           <p className="mt-1 text-sm text-slate-500">Track and submit maintenance issues for your unit.</p>
-          {loading && <p className="mt-2 text-xs text-slate-400">Loading…</p>}
         </div>
         <button
           onClick={openCreateForm}
@@ -408,14 +371,16 @@ export default function MaintenancePage() {
         </button>
       </div>
 
+      {/* Create / Edit form */}
       {showForm && (
         <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-base font-semibold text-slate-900 mb-5">
-            {editingId ? "Edit Maintenance Request" : "New Maintenance Request"}
+            {editingId !== null ? "Edit Maintenance Request" : "New Maintenance Request"}
           </h2>
-
           <form onSubmit={handleSave} className="space-y-4">
+
             <div className="grid gap-4 md:grid-cols-2">
+              {/* Issue Type */}
               <div>
                 <label className="block text-sm font-medium text-slate-700">Issue Type</label>
                 <div className="relative">
@@ -434,6 +399,7 @@ export default function MaintenancePage() {
                 </div>
               </div>
 
+              {/* Urgency */}
               <div>
                 <label className="block text-sm font-medium text-slate-700">Urgency</label>
                 <div className="relative">
@@ -449,6 +415,7 @@ export default function MaintenancePage() {
               </div>
             </div>
 
+            {/* Description */}
             <div>
               <label className="block text-sm font-medium text-slate-700">Description</label>
               <textarea
@@ -461,6 +428,7 @@ export default function MaintenancePage() {
               />
             </div>
 
+            {/* File upload (mock) */}
             <div>
               <label className="block text-sm font-medium text-slate-700">Attach Photo (optional)</label>
               <label className="mt-2 flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 transition hover:border-blue-400 hover:bg-blue-50">
@@ -472,15 +440,12 @@ export default function MaintenancePage() {
             </div>
 
             <div className="flex items-center gap-3 pt-1">
-              <button
-                type="submit"
+              <button type="submit"
                 className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
               >
-                {editingId ? "Save Changes" : "Submit Request"}
+                {editingId !== null ? "Save Changes" : "Submit Request"}
               </button>
-
-              <button
-                type="button"
+              <button type="button"
                 onClick={() => { setShowForm(false); setEditingId(null); }}
                 className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95"
               >
@@ -491,25 +456,29 @@ export default function MaintenancePage() {
         </div>
       )}
 
+      {/* Request cards */}
       <div className="space-y-4">
         {requests.map((req) => {
           const cfg = statusConfig[req.status];
           return (
             <div key={req.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-start justify-between gap-3">
+
+                {/* Left content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-sm font-semibold text-slate-900">{req.title}</p>
                     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${cfg.badge}`}>
                       {req.status}
                     </span>
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${urgencyConfig[req.urgency] || urgencyConfig.Medium}`}>
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${urgencyConfig[req.urgency]}`}>
                       {req.urgency}
                     </span>
                   </div>
                   <p className="mt-1.5 text-xs text-slate-500 leading-relaxed">{req.description}</p>
                 </div>
 
+                {/* Right — date + category + 3-dot menu */}
                 <div className="flex flex-col items-end gap-1 flex-shrink-0">
                   <div className="flex items-center gap-1">
                     <div className="text-right mr-1">
@@ -523,11 +492,16 @@ export default function MaintenancePage() {
                     />
                   </div>
                 </div>
+
               </div>
 
+              {/* Progress bar */}
               <div className="mt-4">
                 <div className="h-1.5 w-full rounded-full bg-slate-100">
-                  <div className={`h-1.5 rounded-full transition-all ${cfg.bar}`} style={{ width: progressWidth[req.status] }} />
+                  <div
+                    className={`h-1.5 rounded-full transition-all ${cfg.bar}`}
+                    style={{ width: progressWidth[req.status] }}
+                  />
                 </div>
               </div>
             </div>
@@ -535,6 +509,7 @@ export default function MaintenancePage() {
         })}
       </div>
 
+      {/* View modal */}
       {viewReq && (
         <ViewModal
           req={viewReq}
@@ -543,6 +518,7 @@ export default function MaintenancePage() {
         />
       )}
 
+      {/* Delete confirmation modal */}
       {deleteTargetId !== null && (
         <ConfirmDeleteModal
           onCancel={() => setDeleteTargetId(null)}

@@ -1,40 +1,45 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ChevronDown, CheckCircle2, X, AlertTriangle, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, CheckCircle2, X, AlertTriangle } from "lucide-react";
 
+type Priority = "Low" | "Medium" | "High" | "Emergency";
 type TicketStatus = "Submitted" | "In Progress" | "Completed";
 
-// Map DB statuses ↔ display statuses
-const dbToDisplay: Record<string, TicketStatus> = {
-  OPEN: "Submitted",
-  IN_PROGRESS: "In Progress",
-  RESOLVED: "Completed",
-  CLOSED: "Completed",
-};
-const displayToDb: Record<TicketStatus, string> = {
-  Submitted: "OPEN",
-  "In Progress": "IN_PROGRESS",
-  Completed: "RESOLVED",
-};
-
 type Ticket = {
-  id: string;
+  id: number;
   tenant: string;
+  unit: string;
   property: string;
   title: string;
   description: string;
   date: string;
+  priority: Priority;
   status: TicketStatus;
   urgent: boolean;
   contractor: string;
   notes: string;
 };
 
+const initialTickets: Ticket[] = [
+  { id: 1, tenant: "Marcus Reid",    unit: "Unit 2A", property: "Maplewood Residences", title: "Leaking pipe under sink",   description: "Water dripping from the pipe under the kitchen sink. Getting worse.", date: "Feb 3, 2026",  priority: "High",      status: "Submitted",   urgent: true,  contractor: "", notes: "" },
+  { id: 2, tenant: "Priya Sharma",   unit: "Unit 3C", property: "Maplewood Residences", title: "Broken window lock",        description: "The lock on the bedroom window is broken and won't secure.",          date: "Feb 5, 2026",  priority: "Medium",    status: "In Progress", urgent: false, contractor: "Mike's Handyman", notes: "Parts ordered." },
+  { id: 3, tenant: "Tom Eriksson",   unit: "Unit 1B", property: "Oakview Apartments",   title: "HVAC not working",          description: "Heating unit stopped working, room is freezing.",                     date: "Feb 6, 2026",  priority: "Emergency", status: "Submitted",   urgent: true,  contractor: "", notes: "" },
+  { id: 4, tenant: "Lena Kowalski",  unit: "Unit 4D", property: "Oakview Apartments",   title: "Light bulb replacement",    description: "Hallway light bulb burnt out.",                                       date: "Jan 28, 2026", priority: "Low",       status: "Completed",   urgent: false, contractor: "", notes: "Replaced Feb 2." },
+  { id: 5, tenant: "Ahmed Siddiqui", unit: "Unit 5A", property: "Maplewood Residences", title: "Bathroom light flickering", description: "Overhead light in bathroom flickers intermittently.",                date: "Feb 7, 2026",  priority: "Medium",    status: "Submitted",   urgent: false, contractor: "", notes: "" },
+];
+
+const priorityConfig: Record<Priority, string> = {
+  Low:       "bg-slate-100 text-slate-600",
+  Medium:    "bg-amber-100 text-amber-700",
+  High:      "bg-orange-100 text-orange-700",
+  Emergency: "bg-red-100 text-red-700",
+};
+
 const statusConfig: Record<TicketStatus, { badge: string; bar: string }> = {
-  Submitted:     { badge: "bg-blue-100 text-blue-700",   bar: "bg-blue-500"  },
+  Submitted:   { badge: "bg-blue-100 text-blue-700",   bar: "bg-blue-500"  },
   "In Progress": { badge: "bg-amber-100 text-amber-700", bar: "bg-amber-500" },
-  Completed:     { badge: "bg-green-100 text-green-700", bar: "bg-green-500" },
+  Completed:   { badge: "bg-green-100 text-green-700", bar: "bg-green-500" },
 };
 
 const progressWidth: Record<TicketStatus, string> = {
@@ -79,7 +84,7 @@ function NotesModal({
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">Ticket Details</p>
             <h2 className="mt-1 text-base font-bold text-slate-900">{ticket.title}</h2>
-            <p className="text-xs text-slate-500">{ticket.tenant} · {ticket.property}</p>
+            <p className="text-xs text-slate-500">{ticket.tenant} · {ticket.unit}</p>
           </div>
           <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition">
             <X className="h-4 w-4" />
@@ -123,64 +128,26 @@ function NotesModal({
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function LandlordMaintenance() {
-  const [tickets, setTickets]   = useState<Ticket[]>([]);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState<string | null>(null);
+  const [tickets, setTickets]   = useState<Ticket[]>(initialTickets);
   const [toast, setToast]       = useState<string | null>(null);
   const [notesTicket, setNotesTicket] = useState<Ticket | null>(null);
   const [filterStatus, setFilterStatus] = useState("All");
-
-  useEffect(() => {
-    fetch("/api/maintenance")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load");
-        return res.json();
-      })
-      .then((data) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const mapped: Ticket[] = data.map((r: any) => ({
-          id: r.id,
-          tenant: r.createdBy?.name ?? "Unknown",
-          property: r.property?.name ?? "Unknown",
-          title: r.title,
-          description: r.description,
-          date: new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-          status: dbToDisplay[r.status] ?? "Submitted",
-          urgent: false,
-          contractor: "",
-          notes: "",
-        }));
-        setTickets(mapped);
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
 
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3500);
   };
 
-  const updateStatus = async (id: string, status: TicketStatus) => {
+  const updateStatus = (id: number, status: TicketStatus) => {
     setTickets((prev) => prev.map((t) => t.id === id ? { ...t, status } : t));
-    try {
-      const res = await fetch(`/api/maintenance/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: displayToDb[status] }),
-      });
-      if (!res.ok) throw new Error("Failed to update");
-      showToast(`Status updated to "${status}".`);
-    } catch {
-      showToast("Failed to update status.");
-    }
+    showToast(`Status updated to "${status}".`);
   };
 
-  const toggleUrgent = (id: string) => {
+  const toggleUrgent = (id: number) => {
     setTickets((prev) => prev.map((t) => t.id === id ? { ...t, urgent: !t.urgent } : t));
   };
 
-  const saveNotes = (id: string, notes: string, contractor: string) => {
+  const saveNotes = (id: number, notes: string, contractor: string) => {
     setTickets((prev) => prev.map((t) => t.id === id ? { ...t, notes, contractor } : t));
     showToast("Ticket updated.");
   };
@@ -190,24 +157,6 @@ export default function LandlordMaintenance() {
     : tickets.filter((t) => t.status === filterStatus);
 
   const selectBase = "appearance-none rounded-lg border border-slate-300 bg-white pl-3 pr-8 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition";
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full py-32">
-        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-        <span className="ml-2 text-sm text-slate-500">Loading tickets...</span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full py-32">
-        <p className="text-sm text-red-600 mb-3">{error}</p>
-        <button onClick={() => window.location.reload()} className="text-sm text-blue-600 hover:underline">Retry</button>
-      </div>
-    );
-  }
 
   return (
     <div className="px-8 py-8 max-w-4xl mx-auto">
@@ -228,11 +177,6 @@ export default function LandlordMaintenance() {
         </div>
       </div>
 
-      {/* Empty state */}
-      {filtered.length === 0 && (
-        <p className="text-sm text-slate-400 text-center py-16">No maintenance tickets found.</p>
-      )}
-
       {/* Ticket cards */}
       <div className="space-y-4">
         {filtered.map((t) => {
@@ -246,13 +190,14 @@ export default function LandlordMaintenance() {
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-semibold text-slate-900">{t.title}</p>
                     <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${cfg.badge}`}>{t.status}</span>
+                    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${priorityConfig[t.priority]}`}>{t.priority}</span>
                     {t.urgent && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">
                         <AlertTriangle className="h-3 w-3" /> Urgent
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 text-xs text-slate-500">{t.tenant} · {t.property}</p>
+                  <p className="mt-1 text-xs text-slate-500">{t.tenant} · {t.unit} · {t.property}</p>
                   <p className="mt-1.5 text-xs text-slate-500 leading-relaxed">{t.description}</p>
                   {t.contractor && (
                     <p className="mt-1 text-xs text-blue-600 font-medium">Assigned: {t.contractor}</p>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Eye, EyeOff } from "lucide-react";
+import { CheckCircle2, ChevronDown, Eye, EyeOff, X } from "lucide-react";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import Navbar from "@/components/Navbar";
@@ -15,13 +15,14 @@ type FormFields = {
   phone: string;
   password: string;
   confirmPassword: string;
-  unitsManaged: string;
-  ownershipType: string;
-  propertyTypes: string[];
-  propertyStreet: string;
-  propertyCity: string;
-  propertyPostal: string;
-  isAuthorized: boolean;
+  companyOrLandlordName: string;
+  numberOfUnitsManaged: string;
+  primaryPropertyStreetAddress: string;
+  city: string;
+  postalOrZipCode: string;
+  propertyOwnerType: string;
+  propertyType: string;
+  confirmOwnershipOrAuthorization: boolean;
   agreeToTerms: boolean;
 };
 
@@ -56,16 +57,32 @@ function validate(fields: FormFields): Record<string, string> {
     errs.confirmPassword = "Passwords do not match.";
   }
 
-  if (!fields.unitsManaged) errs.unitsManaged = "Please select the number of units you manage.";
-  if (!fields.ownershipType) errs.ownershipType = "Please select a property ownership type.";
-  if (fields.propertyTypes.length === 0) errs.propertyTypes = "Please select at least one property type.";
+  if (!fields.companyOrLandlordName.trim())
+    errs.companyOrLandlordName = "Company / Landlord name is required.";
 
-  if (!fields.propertyStreet.trim()) errs.propertyStreet = "Street address is required.";
-  if (!fields.propertyCity.trim()) errs.propertyCity = "City is required.";
-  if (!fields.propertyPostal.trim()) errs.propertyPostal = "Postal / ZIP code is required.";
+  if (!fields.numberOfUnitsManaged.trim())
+    errs.numberOfUnitsManaged = "Number of units managed is required.";
 
-  if (!fields.isAuthorized) errs.isAuthorized = "You must confirm you are the owner or authorized manager.";
-  if (!fields.agreeToTerms) errs.agreeToTerms = "You must agree to the Terms & Privacy Policy.";
+  if (!fields.primaryPropertyStreetAddress.trim())
+    errs.primaryPropertyStreetAddress = "Street address is required.";
+
+  if (!fields.city.trim()) errs.city = "City is required.";
+
+  if (!fields.postalOrZipCode.trim())
+    errs.postalOrZipCode = "Postal / ZIP code is required.";
+
+  if (!fields.propertyOwnerType.trim())
+    errs.propertyOwnerType = "Property ownership type is required.";
+
+  if (!fields.propertyType.trim())
+    errs.propertyType = "Property type is required.";
+
+  if (!fields.confirmOwnershipOrAuthorization)
+    errs.confirmOwnershipOrAuthorization =
+      "You must confirm you are the owner or authorized manager.";
+
+  if (!fields.agreeToTerms)
+    errs.agreeToTerms = "You must agree to the Terms & Privacy Policy.";
 
   return errs;
 }
@@ -73,6 +90,8 @@ function validate(fields: FormFields): Record<string, string> {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function LandlordRegisterPage() {
+  const router = useRouter();
+
   // Field values — Section A
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -81,17 +100,16 @@ export default function LandlordRegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   // Field values — Section B
-  const [companyName, setCompanyName] = useState("");
-  const [unitsManaged, setUnitsManaged] = useState("");
-  const [ownershipType, setOwnershipType] = useState("");
-  const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
-  const [propertyStreet, setPropertyStreet] = useState("");
-  const [propertyCity, setPropertyCity] = useState("");
-  const [propertyPostal, setPropertyPostal] = useState("");
-  const [supportEmail, setSupportEmail] = useState("");
+  const [companyOrLandlordName, setCompanyOrLandlordName] = useState("");
+  const [numberOfUnitsManaged, setNumberOfUnitsManaged] = useState("");
+  const [primaryPropertyStreetAddress, setPrimaryPropertyStreetAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [postalOrZipCode, setPostalOrZipCode] = useState("");
+  const [propertyOwnerType, setPropertyOwnerType] = useState("");
+  const [propertyType, setPropertyType] = useState("");
 
   // Field values — Section C & D
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [confirmOwnershipOrAuthorization, setConfirmOwnershipOrAuthorization] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
 
   // UI state
@@ -99,29 +117,21 @@ export default function LandlordRegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [serverError, setServerError] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Validation state
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Helper: current required field values for validate()
   const currentFields = (): FormFields => ({
     fullName, email, phone, password, confirmPassword,
-    unitsManaged, ownershipType, propertyTypes,
-    propertyStreet, propertyCity, propertyPostal,
-    isAuthorized, agreeToTerms,
+    companyOrLandlordName, numberOfUnitsManaged,
+    primaryPropertyStreetAddress, city, postalOrZipCode,
+    propertyOwnerType, propertyType,
+    confirmOwnershipOrAuthorization, agreeToTerms,
   });
 
-  const togglePropertyType = (value: string) => {
-    const next = propertyTypes.includes(value)
-      ? propertyTypes.filter((v) => v !== value)
-      : [...propertyTypes, value];
-    setPropertyTypes(next);
-    setTouched((t) => ({ ...t, propertyTypes: true }));
-    setErrors(validate({ ...currentFields(), propertyTypes: next }));
-  };
-
-  // Show error only when field has been touched or form was submitted
   const showError = (field: string) =>
     (touched[field] || submitted) ? errors[field] : undefined;
 
@@ -130,55 +140,43 @@ export default function LandlordRegisterPage() {
     setErrors(validate(currentFields()));
   };
 
-  const router = useRouter();
-  const [apiError, setApiError] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: { preventDefault(): void }) => {
     e.preventDefault();
     setSubmitted(true);
-    setApiError("");
+    setServerError("");
     const errs = validate(currentFields());
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
     setIsLoading(true);
-    try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: fullName,
-          email,
-          password,
-          role: "LANDLORD",
-        }),
-      });
 
-      if (!res.ok) {
-        const data = await res.json();
-        setApiError(data.error || "Registration failed");
-        setIsLoading(false);
-        return;
+    const res = await fetch("/api/auth/register/landlord", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fullName, email, phone, password, confirmPassword,
+        companyOrLandlordName, numberOfUnitsManaged,
+        primaryPropertyStreetAddress, city, postalOrZipCode,
+        propertyOwnerType, propertyType,
+        confirmOwnershipOrAuthorization, agreeToTerms,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (data.errors) {
+        setErrors(data.errors);
+        if (data.errors.server) setServerError(data.errors.server);
+      } else {
+        setServerError("Registration failed. Please try again.");
       }
-
-      // Auto-login after registration
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setApiError("Account created but login failed. Please log in manually.");
-        setIsLoading(false);
-        return;
-      }
-
-      router.push("/landlord/dashboard");
-    } catch {
-      setApiError("Something went wrong. Please try again.");
       setIsLoading(false);
+      return;
     }
+
+    setIsLoading(false);
+    setShowSuccessModal(true);
   };
 
   // Shared Tailwind helpers
@@ -221,6 +219,13 @@ export default function LandlordRegisterPage() {
             <p className="mt-2 text-sm text-slate-600">
               Fill in your details below to get started with PropManager.
             </p>
+
+            {/* Server error banner */}
+            {serverError && (
+              <div className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {serverError}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} noValidate>
 
@@ -352,33 +357,36 @@ export default function LandlordRegisterPage() {
               <div className="mt-5 grid gap-4 md:grid-cols-2">
 
                 {/* Company / Landlord Name */}
-                <div>
-                  <label htmlFor="companyName" className="block text-sm font-medium text-slate-700">
-                    Company / Landlord Name{" "}
-                    <span className="font-normal text-slate-400">(optional)</span>
+                <div className="md:col-span-2">
+                  <label htmlFor="companyOrLandlordName" className="block text-sm font-medium text-slate-700">
+                    Company / Landlord Name
                   </label>
                   <input
-                    id="companyName"
+                    id="companyOrLandlordName"
                     type="text"
-                    value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
+                    value={companyOrLandlordName}
+                    onChange={(e) => setCompanyOrLandlordName(e.target.value)}
+                    onBlur={() => handleBlur("companyOrLandlordName")}
                     placeholder="e.g. Smith Properties LLC"
-                    className={`${inputBase} ${inputDefault}`}
+                    className={inputClass("companyOrLandlordName")}
                   />
+                  {showError("companyOrLandlordName") && (
+                    <p className="mt-1 text-xs text-red-500">{errors.companyOrLandlordName}</p>
+                  )}
                 </div>
 
                 {/* Number of Units Managed */}
                 <div>
-                  <label htmlFor="unitsManaged" className="block text-sm font-medium text-slate-700">
+                  <label htmlFor="numberOfUnitsManaged" className="block text-sm font-medium text-slate-700">
                     Number of Units Managed
                   </label>
                   <div className="relative">
                     <select
-                      id="unitsManaged"
-                      value={unitsManaged}
-                      onChange={(e) => setUnitsManaged(e.target.value)}
-                      onBlur={() => handleBlur("unitsManaged")}
-                      className={selectClass("unitsManaged")}
+                      id="numberOfUnitsManaged"
+                      value={numberOfUnitsManaged}
+                      onChange={(e) => setNumberOfUnitsManaged(e.target.value)}
+                      onBlur={() => handleBlur("numberOfUnitsManaged")}
+                      className={selectClass("numberOfUnitsManaged")}
                     >
                       <option value="" disabled>Select range…</option>
                       <option value="1">1</option>
@@ -389,157 +397,129 @@ export default function LandlordRegisterPage() {
                     </select>
                     <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                   </div>
-                  {showError("unitsManaged") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.unitsManaged}</p>
-                  )}
-                </div>
-
-                {/* Property Street Address — full width */}
-                <div className="md:col-span-2">
-                  <label htmlFor="propertyStreet" className="block text-sm font-medium text-slate-700">
-                    Primary Property Street Address
-                  </label>
-                  <input
-                    id="propertyStreet"
-                    type="text"
-                    value={propertyStreet}
-                    onChange={(e) => setPropertyStreet(e.target.value)}
-                    onBlur={() => handleBlur("propertyStreet")}
-                    placeholder="123 Main Street"
-                    className={inputClass("propertyStreet")}
-                  />
-                  {showError("propertyStreet") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.propertyStreet}</p>
-                  )}
-                </div>
-
-                {/* City */}
-                <div>
-                  <label htmlFor="propertyCity" className="block text-sm font-medium text-slate-700">
-                    City
-                  </label>
-                  <input
-                    id="propertyCity"
-                    type="text"
-                    value={propertyCity}
-                    onChange={(e) => setPropertyCity(e.target.value)}
-                    onBlur={() => handleBlur("propertyCity")}
-                    placeholder="Toronto"
-                    className={inputClass("propertyCity")}
-                  />
-                  {showError("propertyCity") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.propertyCity}</p>
-                  )}
-                </div>
-
-                {/* Postal / ZIP Code */}
-                <div>
-                  <label htmlFor="propertyPostal" className="block text-sm font-medium text-slate-700">
-                    Postal / ZIP Code
-                  </label>
-                  <input
-                    id="propertyPostal"
-                    type="text"
-                    value={propertyPostal}
-                    onChange={(e) => setPropertyPostal(e.target.value)}
-                    onBlur={() => handleBlur("propertyPostal")}
-                    placeholder="M5V 2T6"
-                    className={inputClass("propertyPostal")}
-                  />
-                  {showError("propertyPostal") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.propertyPostal}</p>
+                  {showError("numberOfUnitsManaged") && (
+                    <p className="mt-1 text-xs text-red-500">{errors.numberOfUnitsManaged}</p>
                   )}
                 </div>
 
                 {/* Property Ownership Type */}
                 <div>
-                  <label htmlFor="ownershipType" className="block text-sm font-medium text-slate-700">
+                  <label htmlFor="propertyOwnerType" className="block text-sm font-medium text-slate-700">
                     Property Ownership Type
                   </label>
                   <div className="relative">
                     <select
-                      id="ownershipType"
-                      value={ownershipType}
-                      onChange={(e) => setOwnershipType(e.target.value)}
-                      onBlur={() => handleBlur("ownershipType")}
-                      className={selectClass("ownershipType")}
+                      id="propertyOwnerType"
+                      value={propertyOwnerType}
+                      onChange={(e) => setPropertyOwnerType(e.target.value)}
+                      onBlur={() => handleBlur("propertyOwnerType")}
+                      className={selectClass("propertyOwnerType")}
                     >
                       <option value="" disabled>Select type…</option>
-                      <option value="individual">Individual Owner</option>
-                      <option value="mgmt-company">Property Management Company</option>
-                      <option value="real-estate-agency">Real Estate Agency</option>
-                      <option value="investor-group">Investor Group</option>
-                      <option value="developer">Real Estate Developer</option>
-                      <option value="housing-assoc">Housing Association / Co-op</option>
-                      <option value="other">Other</option>
+                      <option value="Individual Owner">Individual Owner</option>
+                      <option value="Property Management Company">Property Management Company</option>
+                      <option value="Realtor / Agent">Realtor / Agent</option>
+                      <option value="Housing Cooperative">Housing Cooperative</option>
+                      <option value="Other">Other</option>
                     </select>
                     <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                   </div>
-                  {showError("ownershipType") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.ownershipType}</p>
+                  {showError("propertyOwnerType") && (
+                    <p className="mt-1 text-xs text-red-500">{errors.propertyOwnerType}</p>
                   )}
                 </div>
 
-                {/* Property Types Managed — full-width checkbox grid */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700">
-                    Property Types Managed
-                  </label>
-                  <div
-                    className={`mt-2 rounded-lg border px-4 py-3 ${
-                      showError("propertyTypes")
-                        ? "border-red-400"
-                        : "border-slate-300"
-                    }`}
-                  >
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 sm:grid-cols-3">
-                      {[
-                        "Apartments",
-                        "Condos",
-                        "Single-Family Homes",
-                        "Multi-Family Homes",
-                        "Townhouses",
-                        "Student Housing",
-                        "Commercial Offices",
-                        "Retail Spaces",
-                        "Industrial Properties",
-                        "Mixed-Use Buildings",
-                        "Vacation Rentals",
-                        "Affordable Housing",
-                        "Senior Living / Assisted Living",
-                        "Other",
-                      ].map((type) => (
-                        <label key={type} className="flex cursor-pointer items-center gap-2.5">
-                          <input
-                            type="checkbox"
-                            checked={propertyTypes.includes(type)}
-                            onChange={() => togglePropertyType(type)}
-                            className="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 transition duration-200 focus:ring-2 focus:ring-blue-500/20"
-                          />
-                          <span className="text-sm text-slate-700">{type}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  {showError("propertyTypes") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.propertyTypes}</p>
-                  )}
-                </div>
-
-                {/* Support Contact Email */}
+                {/* Property Type */}
                 <div>
-                  <label htmlFor="supportEmail" className="block text-sm font-medium text-slate-700">
-                    Support Contact Email{" "}
-                    <span className="font-normal text-slate-400">(optional)</span>
+                  <label htmlFor="propertyType" className="block text-sm font-medium text-slate-700">
+                    Property Type
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="propertyType"
+                      value={propertyType}
+                      onChange={(e) => setPropertyType(e.target.value)}
+                      onBlur={() => handleBlur("propertyType")}
+                      className={selectClass("propertyType")}
+                    >
+                      <option value="" disabled>Select type…</option>
+                      <option value="Apartment">Apartment</option>
+                      <option value="Condo">Condo</option>
+                      <option value="House">House</option>
+                      <option value="Townhouse">Townhouse</option>
+                      <option value="Duplex">Duplex</option>
+                      <option value="Triplex">Triplex</option>
+                      <option value="Fourplex">Fourplex</option>
+                      <option value="Multi-family Building">Multi-family Building</option>
+                      <option value="Basement Unit">Basement Unit</option>
+                      <option value="Room Rental">Room Rental</option>
+                      <option value="Student Housing">Student Housing</option>
+                      <option value="Commercial">Commercial</option>
+                      <option value="Mixed-use">Mixed-use</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                  </div>
+                  {showError("propertyType") && (
+                    <p className="mt-1 text-xs text-red-500">{errors.propertyType}</p>
+                  )}
+                </div>
+
+                {/* Primary Property Street Address — full width */}
+                <div className="md:col-span-2">
+                  <label htmlFor="primaryPropertyStreetAddress" className="block text-sm font-medium text-slate-700">
+                    Primary Property Street Address
                   </label>
                   <input
-                    id="supportEmail"
-                    type="email"
-                    value={supportEmail}
-                    onChange={(e) => setSupportEmail(e.target.value)}
-                    placeholder="support@yourcompany.com"
-                    className={`${inputBase} ${inputDefault}`}
+                    id="primaryPropertyStreetAddress"
+                    type="text"
+                    value={primaryPropertyStreetAddress}
+                    onChange={(e) => setPrimaryPropertyStreetAddress(e.target.value)}
+                    onBlur={() => handleBlur("primaryPropertyStreetAddress")}
+                    placeholder="123 Main Street"
+                    className={inputClass("primaryPropertyStreetAddress")}
                   />
+                  {showError("primaryPropertyStreetAddress") && (
+                    <p className="mt-1 text-xs text-red-500">{errors.primaryPropertyStreetAddress}</p>
+                  )}
+                </div>
+
+                {/* City */}
+                <div>
+                  <label htmlFor="city" className="block text-sm font-medium text-slate-700">
+                    City
+                  </label>
+                  <input
+                    id="city"
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    onBlur={() => handleBlur("city")}
+                    placeholder="Toronto"
+                    className={inputClass("city")}
+                  />
+                  {showError("city") && (
+                    <p className="mt-1 text-xs text-red-500">{errors.city}</p>
+                  )}
+                </div>
+
+                {/* Postal / ZIP Code */}
+                <div>
+                  <label htmlFor="postalOrZipCode" className="block text-sm font-medium text-slate-700">
+                    Postal / ZIP Code
+                  </label>
+                  <input
+                    id="postalOrZipCode"
+                    type="text"
+                    value={postalOrZipCode}
+                    onChange={(e) => setPostalOrZipCode(e.target.value)}
+                    onBlur={() => handleBlur("postalOrZipCode")}
+                    placeholder="M5V 2T6"
+                    className={inputClass("postalOrZipCode")}
+                  />
+                  {showError("postalOrZipCode") && (
+                    <p className="mt-1 text-xs text-red-500">{errors.postalOrZipCode}</p>
+                  )}
                 </div>
 
               </div>
@@ -550,13 +530,13 @@ export default function LandlordRegisterPage() {
               <div className="mt-5">
                 <label className="flex cursor-pointer items-start gap-3">
                   <input
-                    id="isAuthorized"
+                    id="confirmOwnershipOrAuthorization"
                     type="checkbox"
-                    checked={isAuthorized}
+                    checked={confirmOwnershipOrAuthorization}
                     onChange={(e) => {
-                      setIsAuthorized(e.target.checked);
-                      setTouched((t) => ({ ...t, isAuthorized: true }));
-                      setErrors(validate({ ...currentFields(), isAuthorized: e.target.checked }));
+                      setConfirmOwnershipOrAuthorization(e.target.checked);
+                      setTouched((t) => ({ ...t, confirmOwnershipOrAuthorization: true }));
+                      setErrors(validate({ ...currentFields(), confirmOwnershipOrAuthorization: e.target.checked }));
                     }}
                     className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 transition duration-200 focus:ring-2 focus:ring-blue-500/20"
                   />
@@ -564,8 +544,8 @@ export default function LandlordRegisterPage() {
                     I confirm I am the property owner or an authorized property manager
                   </span>
                 </label>
-                {showError("isAuthorized") && (
-                  <p className="mt-1.5 text-xs text-red-500">{errors.isAuthorized}</p>
+                {showError("confirmOwnershipOrAuthorization") && (
+                  <p className="mt-1.5 text-xs text-red-500">{errors.confirmOwnershipOrAuthorization}</p>
                 )}
               </div>
 
@@ -626,6 +606,40 @@ export default function LandlordRegisterPage() {
           </div>
         </div>
       </main>
+
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="relative z-10 w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setShowSuccessModal(false)}
+              className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+              aria-label="Close popup"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <div className="flex items-start gap-4">
+              <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-100">
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Account successfully created</h3>
+                <p className="mt-1.5 text-sm text-slate-500">
+                  Your landlord account is ready. Continue to login.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => router.push("/login")}
+              className="mt-6 w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+            >
+              Go to Login
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
