@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 
@@ -29,7 +28,7 @@ export default function LoginPage() {
     });
 
     if (result?.error) {
-      setServerError("Invalid email or password. Please try again.");
+      setError("Invalid email or password. Please try again.");
       setIsLoading(false);
       return;
     }
@@ -64,9 +63,9 @@ export default function LoginPage() {
             </div>
 
             {/* Server error banner */}
-            {serverError && (
+            {error && (
               <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {serverError}
+                {error}
               </div>
             )}
 
