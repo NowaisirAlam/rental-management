@@ -128,13 +128,11 @@ export default function TenantRegisterPage() {
 
     setIsLoading(true);
 
-    const res = await fetch("/api/auth/register/tenant", {
+    const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        fullName, email, phone, password, confirmPassword,
-        apartmentOrUnitNumber, buildingOrInvitationCode, moveInDate,
-        emergencyContactName, emergencyContactPhone, agreeToTerms,
+        name: fullName, email, password, role: "TENANT",
       }),
     });
 
