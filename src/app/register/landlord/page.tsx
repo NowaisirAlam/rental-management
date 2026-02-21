@@ -150,15 +150,11 @@ export default function LandlordRegisterPage() {
 
     setIsLoading(true);
 
-    const res = await fetch("/api/auth/register/landlord", {
+    const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        fullName, email, phone, password, confirmPassword,
-        companyOrLandlordName, numberOfUnitsManaged,
-        primaryPropertyStreetAddress, city, postalOrZipCode,
-        propertyOwnerType, propertyType,
-        confirmOwnershipOrAuthorization, agreeToTerms,
+        name: fullName, email, password, role: "LANDLORD",
       }),
     });
 
