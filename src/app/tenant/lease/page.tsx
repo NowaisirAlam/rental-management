@@ -1,28 +1,30 @@
-import { Lock, Download, FileText } from "lucide-react";
+"use client";
 
-// ── Dummy lease data ───────────────────────────────────────────────────────────
+import { useState, useEffect } from "react";
+import { Lock, Download, FileText, Loader2 } from "lucide-react";
 
-const lease = {
-  tenant:       { name: "Sarah Johnson", email: "sarah.johnson@email.com", phone: "+1 (416) 555-0192" },
-  landlord:     { name: "Michael Chen",  company: "Chen Property Group",    email: "mchen@chenproperties.ca" },
-  property:     { address: "742 Maplewood Drive", unit: "Unit 4B", city: "Toronto", province: "ON", postal: "M5V 2T6" },
-  lease:        { start: "Sep 1, 2024", end: "Aug 31, 2026", term: "24 months", notice: "60 days" },
-  financial:    { monthlyRent: 1850, deposit: 1850, dueDay: "1st", grace: "5 days", lateFee: "$50", parking: "$75 / month", pet: "None" },
-  type:         { kind: "Fixed-term", furnished: "Unfurnished" },
-  utilities:    [
-    { name: "Heat",        included: true  },
-    { name: "Water",       included: true  },
-    { name: "Electricity", included: false },
-    { name: "Internet",    included: false },
-    { name: "Gas",         included: true  },
-    { name: "Trash",       included: true  },
-  ],
-  occupants: [
-    { name: "Sarah Johnson", role: "Primary Tenant" },
-    { name: "James Johnson", role: "Co-Occupant"    },
-  ],
-  policies:     { smoking: "Not permitted", noise: "Quiet hours 10 PM – 8 AM", subletting: "Not permitted", guests: "Max 14 consecutive days" },
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type ParsedUtility  = { name: string; included: boolean };
+type ParsedOccupant = { name: string; role: string };
+
+type Lease = {
+  id: string;
+  propertyName: string;
+  propertyAddress: string;
+  startDate: string;
+  endDate: string;
+  rentAmount: number;
+  depositAmount: number;
+  status: string;
+  utilities: ParsedUtility[];
+  occupants: ParsedOccupant[];
 };
+
+const ALL_UTILITIES = ["Heat", "Water", "Electricity", "Internet", "Gas", "Trash"];
+
+const fmt = (d: string) =>
+  d ? new Date(d).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" }) : "—";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -50,7 +52,78 @@ function ReadField({ label, value }: { label: string; value: string }) {
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
-export default function LeasePage() {
+export default function TenantLeasePage() {
+  const [lease,   setLease]   = useState<Lease | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState<string | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/leases");
+        if (!res.ok) throw new Error("Failed to load lease");
+        const data = await res.json() as Record<string, unknown>[];
+        if (data.length === 0) { setLease(null); return; }
+
+        const raw = data[0];
+        const includedNames: string[] = (() => {
+          try { return JSON.parse(raw.utilities as string) as string[]; } catch { return []; }
+        })();
+        const rawOccupants: ParsedOccupant[] = (() => {
+          try { return JSON.parse(raw.occupants as string) as ParsedOccupant[]; } catch { return []; }
+        })();
+        const property = raw.property as { name: string; address: string };
+
+        setLease({
+          id: raw.id as string,
+          propertyName: property?.name ?? "",
+          propertyAddress: property?.address ?? "",
+          startDate: (raw.startDate as string).slice(0, 10),
+          endDate: (raw.endDate as string).slice(0, 10),
+          rentAmount: raw.rentAmount as number,
+          depositAmount: raw.depositAmount as number,
+          status: raw.status as string,
+          utilities: ALL_UTILITIES.map((name) => ({ name, included: includedNames.includes(name) })),
+          occupants: rawOccupants,
+        });
+      } catch {
+        setError("Could not load your lease. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="px-8 py-8 max-w-4xl mx-auto">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+      </div>
+    );
+  }
+
+  if (!lease) {
+    return (
+      <div className="px-8 py-8 max-w-4xl mx-auto">
+        <h1 className="text-2xl font-bold text-slate-900">Lease Info</h1>
+        <div className="mt-8 rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
+          <FileText className="mx-auto h-8 w-8 text-slate-300" />
+          <p className="mt-3 text-sm font-medium text-slate-500">No lease on file</p>
+          <p className="mt-1 text-xs text-slate-400">Contact your landlord to set up your lease agreement.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="px-8 py-8 max-w-4xl mx-auto">
 
@@ -68,39 +141,25 @@ export default function LeasePage() {
         {/* Lease summary */}
         <SectionTitle title="Lease Summary" />
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
-          <ReadField label="Tenant Name"        value={lease.tenant.name} />
-          <ReadField label="Landlord / Manager" value={`${lease.landlord.name} — ${lease.landlord.company}`} />
-          <ReadField label="Property Address"   value={`${lease.property.address}, ${lease.property.unit}`} />
-          <ReadField label="City / Province"    value={`${lease.property.city}, ${lease.property.province}  ${lease.property.postal}`} />
-          <ReadField label="Lease Status"       value="Active" />
+          <ReadField label="Property"      value={lease.propertyName} />
+          <ReadField label="Address"       value={lease.propertyAddress} />
+          <ReadField label="Lease Status"  value={lease.status} />
         </div>
 
         {/* Lease duration */}
         <SectionTitle title="Lease Duration" />
-        <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <ReadField label="Start Date"     value={lease.lease.start} />
-          <ReadField label="End Date"       value={lease.lease.end}   />
-          <ReadField label="Term Length"    value={lease.lease.term}  />
-          <ReadField label="Notice Period"  value={lease.lease.notice} />
+        <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <ReadField label="Start Date" value={fmt(lease.startDate)} />
+          <ReadField label="End Date"   value={fmt(lease.endDate)} />
         </div>
 
         {/* Financials */}
         <SectionTitle title="Financials" />
         <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          <ReadField label="Monthly Rent"    value={`$${lease.financial.monthlyRent.toLocaleString()}`} />
-          <ReadField label="Security Deposit" value={`$${lease.financial.deposit.toLocaleString()}`} />
-          <ReadField label="Due Day"          value={lease.financial.dueDay} />
-          <ReadField label="Grace Period"     value={lease.financial.grace} />
-          <ReadField label="Late Fee"         value={lease.financial.lateFee} />
-          <ReadField label="Parking"          value={lease.financial.parking} />
-          <ReadField label="Pet Fee"          value={lease.financial.pet} />
-        </div>
-
-        {/* Lease Type */}
-        <SectionTitle title="Lease Type" />
-        <div className="mt-5 grid gap-5 sm:grid-cols-2">
-          <ReadField label="Agreement Type" value={lease.type.kind}      />
-          <ReadField label="Furnished"      value={lease.type.furnished} />
+          <ReadField label="Monthly Rent"     value={`$${lease.rentAmount.toLocaleString()}`} />
+          {lease.depositAmount > 0 && (
+            <ReadField label="Security Deposit" value={`$${lease.depositAmount.toLocaleString()}`} />
+          )}
         </div>
 
         {/* Utilities */}
@@ -117,29 +176,24 @@ export default function LeasePage() {
         </div>
 
         {/* Occupants */}
-        <SectionTitle title="Occupants" />
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          {lease.occupants.map((o) => (
-            <div key={o.name} className="flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-3">
-              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
-                {o.name.split(" ").map((n) => n[0]).join("")}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-800">{o.name}</p>
-                <p className="text-xs text-slate-500">{o.role}</p>
-              </div>
+        {lease.occupants.length > 0 && (
+          <>
+            <SectionTitle title="Occupants" />
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {lease.occupants.map((o, idx) => (
+                <div key={idx} className="flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-3">
+                  <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
+                    {o.name.split(" ").map((n) => n[0]).join("")}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">{o.name}</p>
+                    <p className="text-xs text-slate-500">{o.role}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-
-        {/* Policies */}
-        <SectionTitle title="Policies" />
-        <div className="mt-5 grid gap-5 sm:grid-cols-2">
-          <ReadField label="Smoking"    value={lease.policies.smoking}    />
-          <ReadField label="Noise"      value={lease.policies.noise}      />
-          <ReadField label="Subletting" value={lease.policies.subletting} />
-          <ReadField label="Guests"     value={lease.policies.guests}     />
-        </div>
+          </>
+        )}
 
         {/* Documents */}
         <SectionTitle title="Documents" />
