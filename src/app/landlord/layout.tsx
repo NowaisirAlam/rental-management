@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import LandlordSidebar from "@/components/landlord/Sidebar";
+import LandlordSidebar from "@/components/landlord/sidebar";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 
 function LandlordShell({ children }: { children: React.ReactNode }) {
