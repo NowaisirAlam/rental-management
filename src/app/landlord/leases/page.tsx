@@ -3,49 +3,49 @@
 import { useState, useEffect, useRef } from "react";
 import {
   Plus, FileText, X, CheckCircle2, ChevronDown,
-  MoreVertical, Eye, Pencil, Trash2, AlertTriangle,
+  MoreVertical, Eye, Pencil, Trash2, AlertTriangle, Loader2,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type Utility  = { name: string; included: boolean };
-type Occupant = { id: number; name: string; role: string };
+type ParsedUtility  = { name: string; included: boolean };
+type ParsedOccupant = { name: string; role: string };
 
 type Lease = {
-  id: number;
-  // Summary
+  id: string;
+  tenantId: string;
   tenantName: string;
   tenantEmail: string;
-  tenantPhone: string;
-  landlordManager: string;
-  property: string;
-  unit: string;
-  cityProvince: string;
-  leaseStatus: string;
-  // Duration
+  tenantPhone: string | null;
+  propertyId: string;
+  propertyName: string;
+  propertyAddress: string;
   startDate: string;
   endDate: string;
-  termLength: string;
-  noticePeriod: string;
-  // Financials
-  rent: string;
-  deposit: string;
-  dueDay: string;
-  grace: string;
-  lateFee: string;
-  parking: string;
-  petFee: string;
-  // Type
-  agreementType: string;
-  furnished: string;
-  // Utilities & Occupants
-  utilities: Utility[];
-  occupants: Occupant[];
+  rentAmount: number;
+  depositAmount: number;
+  status: string;
+  utilities: ParsedUtility[];
+  occupants: ParsedOccupant[];
+};
+
+type ApiTenant = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  propertyId: string | null;
+};
+
+type ApiProperty = {
+  id: string;
+  name: string;
+  address: string;
 };
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
 
-const DEFAULT_UTILITIES: Utility[] = [
+const DEFAULT_UTILITIES: ParsedUtility[] = [
   { name: "Heat",        included: false },
   { name: "Water",       included: false },
   { name: "Electricity", included: false },
@@ -54,87 +54,40 @@ const DEFAULT_UTILITIES: Utility[] = [
   { name: "Trash",       included: false },
 ];
 
-const initialLeases: Lease[] = [
-  {
-    id: 1,
-    tenantName: "Marcus Reid", tenantEmail: "marcus@email.com", tenantPhone: "+1 416 555-0101",
-    landlordManager: "Michael Chen — Chen Property Group",
-    property: "Maplewood Residences", unit: "Unit 2A", cityProvince: "Toronto, ON  M5V 2T6",
-    leaseStatus: "Active",
-    startDate: "2024-09-01", endDate: "2026-08-31", termLength: "24 months", noticePeriod: "60 days",
-    rent: "1800", deposit: "3600", dueDay: "1st", grace: "5 days", lateFee: "$50", parking: "$75 / month", petFee: "None",
-    agreementType: "Fixed-term", furnished: "Unfurnished",
-    utilities: [
-      { name: "Heat", included: true }, { name: "Water", included: true },
-      { name: "Electricity", included: false }, { name: "Internet", included: false },
-      { name: "Gas", included: true }, { name: "Trash", included: true },
-    ],
-    occupants: [
-      { id: 1, name: "Marcus Reid", role: "Primary Tenant" },
-    ],
-  },
-  {
-    id: 2,
-    tenantName: "Priya Sharma", tenantEmail: "priya@email.com", tenantPhone: "+1 416 555-0202",
-    landlordManager: "Michael Chen — Chen Property Group",
-    property: "Maplewood Residences", unit: "Unit 3C", cityProvince: "Toronto, ON  M5V 2T6",
-    leaseStatus: "Active",
-    startDate: "2025-01-01", endDate: "2026-12-31", termLength: "24 months", noticePeriod: "60 days",
-    rent: "2200", deposit: "4400", dueDay: "1st", grace: "5 days", lateFee: "$50", parking: "None", petFee: "None",
-    agreementType: "Fixed-term", furnished: "Furnished",
-    utilities: [
-      { name: "Heat", included: true }, { name: "Water", included: true },
-      { name: "Electricity", included: true }, { name: "Internet", included: false },
-      { name: "Gas", included: true }, { name: "Trash", included: true },
-    ],
-    occupants: [
-      { id: 1, name: "Priya Sharma", role: "Primary Tenant" },
-      { id: 2, name: "Rohan Sharma", role: "Co-Occupant" },
-    ],
-  },
-  {
-    id: 3,
-    tenantName: "Tom Eriksson", tenantEmail: "tom@email.com", tenantPhone: "+1 905 555-0303",
-    landlordManager: "Michael Chen — Chen Property Group",
-    property: "Oakview Apartments", unit: "Unit 1B", cityProvince: "Mississauga, ON  L5B 4T3",
-    leaseStatus: "Active",
-    startDate: "2024-06-01", endDate: "2026-05-31", termLength: "24 months", noticePeriod: "60 days",
-    rent: "1400", deposit: "2800", dueDay: "1st", grace: "5 days", lateFee: "$50", parking: "$50 / month", petFee: "$30 / month",
-    agreementType: "Fixed-term", furnished: "Unfurnished",
-    utilities: [
-      { name: "Heat", included: true }, { name: "Water", included: true },
-      { name: "Electricity", included: false }, { name: "Internet", included: false },
-      { name: "Gas", included: false }, { name: "Trash", included: true },
-    ],
-    occupants: [
-      { id: 1, name: "Tom Eriksson", role: "Primary Tenant" },
-    ],
-  },
-  {
-    id: 4,
-    tenantName: "Lena Kowalski", tenantEmail: "lena@email.com", tenantPhone: "+1 905 555-0404",
-    landlordManager: "Michael Chen — Chen Property Group",
-    property: "Oakview Apartments", unit: "Unit 4D", cityProvince: "Mississauga, ON  L5B 4T3",
-    leaseStatus: "Expired",
-    startDate: "2023-03-01", endDate: "2026-02-28", termLength: "36 months", noticePeriod: "60 days",
-    rent: "1400", deposit: "2800", dueDay: "1st", grace: "5 days", lateFee: "$50", parking: "None", petFee: "None",
-    agreementType: "Fixed-term", furnished: "Unfurnished",
-    utilities: [
-      { name: "Heat", included: true }, { name: "Water", included: true },
-      { name: "Electricity", included: false }, { name: "Internet", included: false },
-      { name: "Gas", included: false }, { name: "Trash", included: true },
-    ],
-    occupants: [
-      { id: 1, name: "Lena Kowalski", role: "Primary Tenant" },
-      { id: 2, name: "Pawel Kowalski", role: "Co-Occupant" },
-    ],
-  },
-];
+const STATUS_OPTIONS = ["ACTIVE", "PENDING", "EXPIRED", "TERMINATED"];
 
-const PROPERTIES       = ["Maplewood Residences", "Oakview Apartments"];
-const STATUS_OPTIONS   = ["Active", "Pending", "Expired", "Terminated"];
-const AGREEMENT_TYPES  = ["Fixed-term", "Month-to-month", "Week-to-week", "Year-to-year"];
-const FURNISHED_OPTIONS = ["Furnished", "Unfurnished", "Semi-furnished"];
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+const fmt = (d: string) =>
+  d ? new Date(d).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" }) : "—";
+
+function parseApiLease(raw: Record<string, unknown>): Lease {
+  const includedNames: string[] = (() => {
+    try { return JSON.parse(raw.utilities as string) as string[]; } catch { return []; }
+  })();
+  const rawOccupants: ParsedOccupant[] = (() => {
+    try { return JSON.parse(raw.occupants as string) as ParsedOccupant[]; } catch { return []; }
+  })();
+  const tenant = raw.tenant as { id: string; name: string; email: string; phone: string | null };
+  const property = raw.property as { name: string; address: string };
+  return {
+    id: raw.id as string,
+    tenantId: raw.tenantId as string,
+    tenantName: tenant?.name ?? "",
+    tenantEmail: tenant?.email ?? "",
+    tenantPhone: tenant?.phone ?? null,
+    propertyId: raw.propertyId as string,
+    propertyName: property?.name ?? "",
+    propertyAddress: property?.address ?? "",
+    startDate: (raw.startDate as string).slice(0, 10),
+    endDate: (raw.endDate as string).slice(0, 10),
+    rentAmount: raw.rentAmount as number,
+    depositAmount: raw.depositAmount as number,
+    status: raw.status as string,
+    utilities: DEFAULT_UTILITIES.map((u) => ({ ...u, included: includedNames.includes(u.name) })),
+    occupants: rawOccupants,
+  };
+}
 
 // ── Shared styles ─────────────────────────────────────────────────────────────
 
@@ -142,9 +95,8 @@ const inputClass  = "mt-1.5 w-full rounded-lg border border-slate-300 bg-white p
 const selectClass = "mt-1.5 w-full appearance-none rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
 const labelClass  = "block text-xs font-medium uppercase tracking-wide text-slate-400";
 const inlineInput = "w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
-const fmt = (d: string) => d ? new Date(d).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" }) : "—";
 
-// ── Section title (same as tenant lease page) ─────────────────────────────────
+// ── Section title ─────────────────────────────────────────────────────────────
 
 function SectionTitle({ title }: { title: string }) {
   return (
@@ -171,28 +123,6 @@ function EditField({
         type={type} value={value} onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder} required={required} className={inputClass}
       />
-    </div>
-  );
-}
-
-// ── SelectField ───────────────────────────────────────────────────────────────
-
-function SelectField({
-  label, value, onChange, options, required = false,
-}: {
-  label: string; value: string; onChange: (v: string) => void;
-  options: string[]; required?: boolean;
-}) {
-  return (
-    <div>
-      <label className={labelClass}>{label}</label>
-      <div className="relative">
-        <select value={value} onChange={(e) => onChange(e.target.value)} required={required} className={selectClass}>
-          {!options.includes(value) && <option value="" disabled>Select…</option>}
-          {options.map((o) => <option key={o}>{o}</option>)}
-        </select>
-        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-      </div>
     </div>
   );
 }
@@ -293,24 +223,19 @@ function ViewLeaseModal({ lease, onClose, onEdit }: { lease: Lease; onClose: () 
           </button>
         </div>
         <div className="px-6 pb-2 overflow-y-auto flex-1">
-          {row("Property",  `${lease.property} — ${lease.unit}`)}
-          {row("Address",   lease.cityProvince)}
-          {row("Status",    lease.leaseStatus)}
+          {row("Property",  lease.propertyName)}
+          {row("Address",   lease.propertyAddress)}
+          {row("Status",    lease.status)}
           {row("Tenant",    lease.tenantName)}
           {row("Email",     lease.tenantEmail)}
-          {lease.tenantPhone && row("Phone", lease.tenantPhone)}
+          {lease.tenantPhone ? row("Phone", lease.tenantPhone) : null}
           {row("Lease",     `${fmt(lease.startDate)} – ${fmt(lease.endDate)}`)}
-          {lease.termLength && row("Term", lease.termLength)}
-          {row("Rent",      `$${Number(lease.rent).toLocaleString()} / month`)}
-          {lease.deposit && row("Deposit", `$${Number(lease.deposit).toLocaleString()}`)}
-          {lease.dueDay && row("Due Day", lease.dueDay)}
-          {lease.lateFee && row("Late Fee", lease.lateFee)}
-          {lease.parking && lease.parking !== "None" && row("Parking", lease.parking)}
-          {row("Agreement", `${lease.agreementType} · ${lease.furnished}`)}
-          {includedUtils.length > 0 && row("Utilities", includedUtils.join(", "))}
-          {lease.occupants.length > 0 && row("Occupants",
+          {row("Rent",      `$${lease.rentAmount.toLocaleString()} / month`)}
+          {lease.depositAmount > 0 ? row("Deposit", `$${lease.depositAmount.toLocaleString()}`) : null}
+          {includedUtils.length > 0 ? row("Utilities", includedUtils.join(", ")) : null}
+          {lease.occupants.length > 0 ? row("Occupants",
             lease.occupants.map((o) => `${o.name} (${o.role})`).join(", ")
-          )}
+          ) : null}
         </div>
         <div className="flex items-center justify-end gap-3 border-t border-slate-100 px-6 py-4 flex-shrink-0">
           <button onClick={onClose} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95">
@@ -363,49 +288,68 @@ function ConfirmDeleteModal({ title, onCancel, onConfirm }: { title: string; onC
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function LandlordLeases() {
-  const [leases,        setLeases]        = useState<Lease[]>(initialLeases);
-  const [showForm,      setShowForm]      = useState(false);
-  const [editingId,     setEditingId]     = useState<number | null>(null);
-  const [viewLease,     setViewLease]     = useState<Lease | null>(null);
-  const [deleteTargetId,setDeleteTargetId]= useState<number | null>(null);
-  const [toast,         setToast]         = useState<string | null>(null);
+  const [leases,         setLeases]         = useState<Lease[]>([]);
+  const [tenants,        setTenants]        = useState<ApiTenant[]>([]);
+  const [properties,     setProperties]     = useState<ApiProperty[]>([]);
+  const [loading,        setLoading]        = useState(true);
+  const [error,          setError]          = useState<string | null>(null);
+  const [showForm,       setShowForm]       = useState(false);
+  const [saving,         setSaving]         = useState(false);
+  const [editingId,      setEditingId]      = useState<string | null>(null);
+  const [viewLease,      setViewLease]      = useState<Lease | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [toast,          setToast]          = useState<string | null>(null);
 
-  // ── Form: Lease Summary ───────────────────────────────────────────────────
-  const [tenantName,      setTenantName]      = useState("");
-  const [tenantEmail,     setTenantEmail]     = useState("");
-  const [tenantPhone,     setTenantPhone]     = useState("");
-  const [landlordManager, setLandlordManager] = useState("");
-  const [property,        setProperty]        = useState("");
-  const [unit,            setUnit]            = useState("");
-  const [cityProvince,    setCityProvince]    = useState("");
-  const [leaseStatus,     setLeaseStatus]     = useState("Active");
-
-  // ── Form: Lease Duration ─────────────────────────────────────────────────
-  const [startDate,    setStartDate]    = useState("");
-  const [endDate,      setEndDate]      = useState("");
-  const [termLength,   setTermLength]   = useState("");
-  const [noticePeriod, setNoticePeriod] = useState("60 days");
-
-  // ── Form: Financials ─────────────────────────────────────────────────────
-  const [rent,    setRent]    = useState("");
-  const [deposit, setDeposit] = useState("");
-  const [dueDay,  setDueDay]  = useState("1st");
-  const [grace,   setGrace]   = useState("5 days");
-  const [lateFee, setLateFee] = useState("$50");
-  const [parking, setParking] = useState("None");
-  const [petFee,  setPetFee]  = useState("None");
-
-  // ── Form: Lease Type ─────────────────────────────────────────────────────
-  const [agreementType, setAgreementType] = useState("Fixed-term");
-  const [furnished,     setFurnished]     = useState("Unfurnished");
-
-  // ── Form: Utilities & Occupants ──────────────────────────────────────────
-  const [formUtilities, setFormUtilities] = useState<Utility[]>(DEFAULT_UTILITIES.map((u) => ({ ...u })));
-  const [formOccupants, setFormOccupants] = useState<Occupant[]>([]);
+  // ── Form state ────────────────────────────────────────────────────────────
+  const [tenantId,      setTenantId]      = useState("");
+  const [propertyId,    setPropertyId]    = useState("");
+  const [startDate,     setStartDate]     = useState("");
+  const [endDate,       setEndDate]       = useState("");
+  const [termLength,    setTermLength]    = useState("");
+  const [rentAmount,    setRentAmount]    = useState("");
+  const [depositAmount, setDepositAmount] = useState("");
+  const [status,        setStatus]        = useState("ACTIVE");
+  const [formUtilities, setFormUtilities] = useState<ParsedUtility[]>(DEFAULT_UTILITIES.map((u) => ({ ...u })));
+  const [formOccupants, setFormOccupants] = useState<ParsedOccupant[]>([]);
   const [newOccName,    setNewOccName]    = useState("");
   const [newOccRole,    setNewOccRole]    = useState("");
 
-  // ── Auto-calculate term length ────────────────────────────────────────────
+  // ── Data fetching ─────────────────────────────────────────────────────────
+  const fetchLeases = async () => {
+    const res = await fetch("/api/leases");
+    if (!res.ok) throw new Error("Failed to load leases");
+    const data = await res.json() as Record<string, unknown>[];
+    setLeases(data.map(parseApiLease));
+  };
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const [leasesRes, tenantsRes, propertiesRes] = await Promise.all([
+          fetch("/api/leases"),
+          fetch("/api/tenants"),
+          fetch("/api/properties"),
+        ]);
+        if (!leasesRes.ok || !tenantsRes.ok || !propertiesRes.ok) throw new Error("Failed to load data");
+        const [leasesData, tenantsData, propertiesData] = await Promise.all([
+          leasesRes.json() as Promise<Record<string, unknown>[]>,
+          tenantsRes.json() as Promise<ApiTenant[]>,
+          propertiesRes.json() as Promise<ApiProperty[]>,
+        ]);
+        setLeases(leasesData.map(parseApiLease));
+        setTenants(tenantsData);
+        setProperties(propertiesData);
+      } catch {
+        setError("Could not load leases. Please refresh.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  // ── Auto-calc term length ─────────────────────────────────────────────────
   useEffect(() => {
     if (!startDate || !endDate) return;
     const s = new Date(startDate), e = new Date(endDate);
@@ -417,25 +361,19 @@ export default function LandlordLeases() {
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3500); };
 
   const resetForm = () => {
-    setTenantName(""); setTenantEmail(""); setTenantPhone("");
-    setLandlordManager(""); setProperty(""); setUnit(""); setCityProvince(""); setLeaseStatus("Active");
-    setStartDate(""); setEndDate(""); setTermLength(""); setNoticePeriod("60 days");
-    setRent(""); setDeposit(""); setDueDay("1st"); setGrace("5 days");
-    setLateFee("$50"); setParking("None"); setPetFee("None");
-    setAgreementType("Fixed-term"); setFurnished("Unfurnished");
+    setTenantId(""); setPropertyId(""); setStartDate(""); setEndDate("");
+    setTermLength(""); setRentAmount(""); setDepositAmount(""); setStatus("ACTIVE");
     setFormUtilities(DEFAULT_UTILITIES.map((u) => ({ ...u })));
     setFormOccupants([]); setNewOccName(""); setNewOccRole("");
   };
 
   const openEditForm = (l: Lease) => {
     setEditingId(l.id);
-    setTenantName(l.tenantName); setTenantEmail(l.tenantEmail); setTenantPhone(l.tenantPhone);
-    setLandlordManager(l.landlordManager); setProperty(l.property); setUnit(l.unit);
-    setCityProvince(l.cityProvince); setLeaseStatus(l.leaseStatus);
-    setStartDate(l.startDate); setEndDate(l.endDate); setTermLength(l.termLength); setNoticePeriod(l.noticePeriod);
-    setRent(l.rent); setDeposit(l.deposit); setDueDay(l.dueDay); setGrace(l.grace);
-    setLateFee(l.lateFee); setParking(l.parking); setPetFee(l.petFee);
-    setAgreementType(l.agreementType); setFurnished(l.furnished);
+    setTenantId(l.tenantId); setPropertyId(l.propertyId);
+    setStartDate(l.startDate); setEndDate(l.endDate);
+    setTermLength("");
+    setRentAmount(String(l.rentAmount)); setDepositAmount(String(l.depositAmount));
+    setStatus(l.status);
     setFormUtilities(l.utilities.map((u) => ({ ...u })));
     setFormOccupants(l.occupants.map((o) => ({ ...o })));
     setShowForm(true);
@@ -445,54 +383,100 @@ export default function LandlordLeases() {
   const toggleUtility = (name: string) =>
     setFormUtilities((prev) => prev.map((u) => u.name === name ? { ...u, included: !u.included } : u));
 
-  const updateOccupant = (id: number, field: "name" | "role", val: string) =>
-    setFormOccupants((prev) => prev.map((o) => o.id === id ? { ...o, [field]: val } : o));
-
   const addOccupant = () => {
     if (!newOccName.trim()) return;
-    setFormOccupants((prev) => [...prev, { id: Date.now(), name: newOccName.trim(), role: newOccRole.trim() || "Occupant" }]);
+    setFormOccupants((prev) => [...prev, { name: newOccName.trim(), role: newOccRole.trim() || "Occupant" }]);
     setNewOccName(""); setNewOccRole("");
   };
 
-  const removeOccupant = (id: number) =>
-    setFormOccupants((prev) => prev.filter((o) => o.id !== id));
+  const removeOccupant = (idx: number) =>
+    setFormOccupants((prev) => prev.filter((_, i) => i !== idx));
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const updateOccupant = (idx: number, field: "name" | "role", val: string) =>
+    setFormOccupants((prev) => prev.map((o, i) => i === idx ? { ...o, [field]: val } : o));
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = {
-      tenantName, tenantEmail, tenantPhone, landlordManager,
-      property, unit, cityProvince, leaseStatus,
-      startDate, endDate, termLength, noticePeriod,
-      rent, deposit, dueDay, grace, lateFee, parking, petFee,
-      agreementType, furnished,
-      utilities: formUtilities.map((u) => ({ ...u })),
-      occupants: formOccupants.map((o) => ({ ...o })),
-    };
-    if (editingId !== null) {
-      setLeases((prev) => prev.map((l) => l.id === editingId ? { ...l, ...data } : l));
-      showToast("Lease updated.");
-    } else {
-      setLeases((prev) => [{ id: Date.now(), ...data }, ...prev]);
-      showToast("Lease created successfully.");
+    setSaving(true);
+    try {
+      const body = {
+        propertyId,
+        tenantId,
+        startDate: new Date(startDate).toISOString(),
+        endDate: new Date(endDate).toISOString(),
+        rentAmount: Number(rentAmount),
+        depositAmount: Number(depositAmount) || 0,
+        status,
+        utilities: formUtilities.filter((u) => u.included).map((u) => u.name),
+        occupants: formOccupants,
+      };
+
+      if (editingId !== null) {
+        const res = await fetch(`/api/leases/${editingId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) { const d = await res.json() as { error: string }; throw new Error(d.error); }
+        showToast("Lease updated.");
+      } else {
+        const res = await fetch("/api/leases", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) { const d = await res.json() as { error: string }; throw new Error(d.error); }
+        // Also assign the tenant to the property
+        await fetch(`/api/tenants/${tenantId}/assign`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ propertyId }),
+        });
+        showToast("Lease created and tenant assigned.");
+      }
+
+      await fetchLeases();
+      resetForm(); setEditingId(null); setShowForm(false);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setSaving(false);
     }
-    resetForm();
-    setEditingId(null);
-    setShowForm(false);
   };
 
-  const handleDeleteConfirm = () => {
-    if (deleteTargetId === null) return;
-    setLeases((prev) => prev.filter((l) => l.id !== deleteTargetId));
-    setDeleteTargetId(null);
-    showToast("Lease deleted.");
+  const handleDeleteConfirm = async () => {
+    if (!deleteTargetId) return;
+    try {
+      const res = await fetch(`/api/leases/${deleteTargetId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Delete failed");
+      setDeleteTargetId(null);
+      await fetchLeases();
+      showToast("Lease deleted.");
+    } catch {
+      showToast("Could not delete lease.");
+    }
   };
 
-  const daysUntil = (d: string) => {
-    if (!d) return null;
-    return Math.ceil((new Date(d).getTime() - Date.now()) / 86400000);
-  };
+  const daysUntil = (d: string) =>
+    Math.ceil((new Date(d).getTime() - Date.now()) / 86400000);
 
   // ── Render ────────────────────────────────────────────────────────────────
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="px-8 py-8 max-w-4xl mx-auto">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-8 py-8 max-w-4xl mx-auto">
@@ -515,90 +499,81 @@ export default function LandlordLeases() {
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-8">
           <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+            <h2 className="text-base font-semibold text-slate-900 mb-1">
+              {editingId !== null ? "Edit Lease" : "New Lease"}
+            </h2>
 
-            <div className="flex items-center justify-between mb-1">
-              <h2 className="text-base font-semibold text-slate-900">
-                {editingId !== null ? "Edit Lease" : "New Lease"}
-              </h2>
-            </div>
-
-            {/* Lease Summary */}
+            {/* Tenant & Property */}
             <SectionTitle title="Lease Summary" />
             <div className="mt-5 grid gap-5 sm:grid-cols-2">
-              <EditField label="Tenant Name"        value={tenantName}      onChange={setTenantName}      required placeholder="e.g. Sarah Johnson" />
-              <EditField label="Landlord / Manager" value={landlordManager} onChange={setLandlordManager} placeholder="e.g. Jane Smith — Smith Properties" />
               <div>
-                <label className={labelClass}>Property</label>
+                <label className={labelClass}>Tenant</label>
                 <div className="relative">
-                  <select value={property} onChange={(e) => setProperty(e.target.value)} required className={selectClass}>
-                    <option value="" disabled>Select property…</option>
-                    {PROPERTIES.map((p) => <option key={p}>{p}</option>)}
+                  <select value={tenantId} onChange={(e) => setTenantId(e.target.value)} required disabled={editingId !== null} className={selectClass}>
+                    <option value="" disabled>Select tenant…</option>
+                    {tenants.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name} ({t.email}){t.propertyId ? " — assigned" : ""}
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                 </div>
               </div>
-              <EditField label="Unit"           value={unit}         onChange={setUnit}         required placeholder="e.g. Unit 2A" />
-              <EditField label="City / Province" value={cityProvince} onChange={setCityProvince} placeholder="e.g. Toronto, ON  M5V 2T6" />
-              <SelectField label="Lease Status" value={leaseStatus} onChange={setLeaseStatus} options={STATUS_OPTIONS} />
-            </div>
-
-            {/* Tenant Contact */}
-            <SectionTitle title="Tenant Contact" />
-            <div className="mt-5 grid gap-5 sm:grid-cols-3">
-              <EditField label="Email" value={tenantEmail} onChange={setTenantEmail} type="email" required placeholder="jane@email.com" />
-              <EditField label="Phone" value={tenantPhone} onChange={setTenantPhone} type="tel"   placeholder="+1 416 555-0000" />
+              <div>
+                <label className={labelClass}>Property</label>
+                <div className="relative">
+                  <select value={propertyId} onChange={(e) => setPropertyId(e.target.value)} required disabled={editingId !== null} className={selectClass}>
+                    <option value="" disabled>Select property…</option>
+                    {properties.map((p) => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                </div>
+              </div>
+              <div>
+                <label className={labelClass}>Lease Status</label>
+                <div className="relative">
+                  <select value={status} onChange={(e) => setStatus(e.target.value)} className={selectClass}>
+                    {STATUS_OPTIONS.map((s) => <option key={s}>{s}</option>)}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                </div>
+              </div>
             </div>
 
             {/* Lease Duration */}
             <SectionTitle title="Lease Duration" />
-            <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              <EditField label="Start Date"    value={startDate}    onChange={setStartDate}    type="date" required />
-              <EditField label="End Date"      value={endDate}      onChange={setEndDate}      type="date" required />
+            <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <EditField label="Start Date" value={startDate} onChange={setStartDate} type="date" required />
+              <EditField label="End Date"   value={endDate}   onChange={setEndDate}   type="date" required />
               <div>
                 <label className={labelClass}>Term Length</label>
-                <input
-                  type="text" value={termLength}
-                  onChange={(e) => setTermLength(e.target.value)}
-                  placeholder="Auto-calculated"
-                  className={`${inputClass} bg-slate-50 text-slate-500`}
-                />
+                <input type="text" value={termLength} readOnly placeholder="Auto-calculated"
+                  className={`${inputClass} bg-slate-50 text-slate-500`} />
               </div>
-              <EditField label="Notice Period" value={noticePeriod} onChange={setNoticePeriod} placeholder="e.g. 60 days" />
             </div>
 
             {/* Financials */}
             <SectionTitle title="Financials" />
-            <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-5 grid gap-5 sm:grid-cols-2">
               <div>
                 <label className={labelClass}>Monthly Rent ($)</label>
-                <input type="number" value={rent} onChange={(e) => setRent(e.target.value)} required min="0" placeholder="1800" className={inputClass} />
+                <input type="number" value={rentAmount} onChange={(e) => setRentAmount(e.target.value)} required min="0" placeholder="1800" className={inputClass} />
               </div>
               <div>
                 <label className={labelClass}>Security Deposit ($)</label>
-                <input type="number" value={deposit} onChange={(e) => setDeposit(e.target.value)} min="0" placeholder="3600" className={inputClass} />
+                <input type="number" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} min="0" placeholder="3600" className={inputClass} />
               </div>
-              <EditField label="Due Day"      value={dueDay}   onChange={setDueDay}   placeholder="e.g. 1st" />
-              <EditField label="Grace Period" value={grace}    onChange={setGrace}    placeholder="e.g. 5 days" />
-              <EditField label="Late Fee"     value={lateFee}  onChange={setLateFee}  placeholder="e.g. $50" />
-              <EditField label="Parking Fee"  value={parking}  onChange={setParking}  placeholder="e.g. $75 / month" />
-              <EditField label="Pet Fee"      value={petFee}   onChange={setPetFee}   placeholder="e.g. None" />
             </div>
 
-            {/* Lease Type */}
-            <SectionTitle title="Lease Type" />
-            <div className="mt-5 grid gap-5 sm:grid-cols-2">
-              <SelectField label="Agreement Type" value={agreementType} onChange={setAgreementType} options={AGREEMENT_TYPES} />
-              <SelectField label="Furnished"      value={furnished}     onChange={setFurnished}     options={FURNISHED_OPTIONS} />
-            </div>
-
-            {/* Utilities Included */}
+            {/* Utilities */}
             <SectionTitle title="Utilities Included" />
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {formUtilities.map((u) => (
                 <button
-                  key={u.name}
-                  type="button"
-                  onClick={() => toggleUtility(u.name)}
+                  key={u.name} type="button" onClick={() => toggleUtility(u.name)}
                   className={`flex items-center justify-between rounded-xl px-4 py-3 transition-all ${
                     u.included
                       ? "bg-green-50 ring-1 ring-green-200 hover:bg-green-100"
@@ -616,74 +591,52 @@ export default function LandlordLeases() {
             {/* Occupants */}
             <SectionTitle title="Occupants" />
             <div className="mt-5 space-y-3">
-
-              {formOccupants.map((o) => (
-                <div key={o.id} className="flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-3">
+              {formOccupants.map((o, idx) => (
+                <div key={idx} className="flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-3">
                   <div className="h-8 w-8 flex-shrink-0 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
                     {o.name.split(" ").map((n) => n[0]).join("").toUpperCase() || "?"}
                   </div>
                   <div className="flex-1 grid gap-3 sm:grid-cols-2">
-                    <input
-                      type="text" value={o.name} placeholder="Full name"
-                      onChange={(e) => updateOccupant(o.id, "name", e.target.value)}
-                      className={inlineInput}
-                    />
-                    <input
-                      type="text" value={o.role} placeholder="Role"
-                      onChange={(e) => updateOccupant(o.id, "role", e.target.value)}
-                      className={inlineInput}
-                    />
+                    <input type="text" value={o.name} placeholder="Full name"
+                      onChange={(e) => updateOccupant(idx, "name", e.target.value)} className={inlineInput} />
+                    <input type="text" value={o.role} placeholder="Role"
+                      onChange={(e) => updateOccupant(idx, "role", e.target.value)} className={inlineInput} />
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => removeOccupant(o.id)}
-                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition"
-                  >
+                  <button type="button" onClick={() => removeOccupant(idx)}
+                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               ))}
-
-              {/* Add occupant */}
               <div className="flex items-center gap-3 rounded-xl border border-dashed border-slate-200 px-4 py-3">
                 <div className="h-8 w-8 flex-shrink-0 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
                   <Plus className="h-4 w-4" />
                 </div>
                 <div className="flex-1 grid gap-3 sm:grid-cols-2">
-                  <input
-                    type="text" value={newOccName} placeholder="Full name"
-                    onChange={(e) => setNewOccName(e.target.value)}
-                    className={inlineInput}
-                  />
-                  <input
-                    type="text" value={newOccRole} placeholder="Role (e.g. Co-Occupant)"
+                  <input type="text" value={newOccName} placeholder="Full name"
+                    onChange={(e) => setNewOccName(e.target.value)} className={inlineInput} />
+                  <input type="text" value={newOccRole} placeholder="Role (e.g. Co-Occupant)"
                     onChange={(e) => setNewOccRole(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addOccupant(); } }}
-                    className={inlineInput}
-                  />
+                    className={inlineInput} />
                 </div>
-                <button
-                  type="button"
-                  onClick={addOccupant}
-                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white transition hover:bg-blue-700 active:scale-95"
-                >
+                <button type="button" onClick={addOccupant}
+                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white transition hover:bg-blue-700 active:scale-95">
                   <Plus className="h-4 w-4" />
                 </button>
               </div>
-
             </div>
           </div>
 
           {/* Form actions */}
           <div className="mt-5 flex items-center gap-3">
-            <button type="submit" className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95">
+            <button type="submit" disabled={saving}
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95 disabled:opacity-60">
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               {editingId !== null ? "Save Changes" : "Create Lease"}
             </button>
-            <button
-              type="button"
-              onClick={() => { resetForm(); setEditingId(null); setShowForm(false); }}
-              className="rounded-lg border border-slate-300 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95"
-            >
+            <button type="button" onClick={() => { resetForm(); setEditingId(null); setShowForm(false); }}
+              className="rounded-lg border border-slate-300 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95">
               Cancel
             </button>
           </div>
@@ -691,56 +644,61 @@ export default function LandlordLeases() {
       )}
 
       {/* ── Lease cards ─────────────────────────────────────────────────────── */}
-      <div className="space-y-4">
-        {leases.map((l) => {
-          const days = daysUntil(l.endDate);
-          const expiringSoon = days !== null && days >= 0 && days <= 60;
-          const expired      = days !== null && days < 0;
-          return (
-            <div key={l.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-4">
-                  <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50">
-                    <FileText className="h-5 w-5 text-blue-600" />
+      {leases.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
+          <FileText className="mx-auto h-8 w-8 text-slate-300" />
+          <p className="mt-3 text-sm font-medium text-slate-500">No leases yet</p>
+          <p className="mt-1 text-xs text-slate-400">Click &ldquo;Add Lease&rdquo; to create your first lease agreement.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {leases.map((l) => {
+            const days = daysUntil(l.endDate);
+            const expiringSoon = days >= 0 && days <= 60;
+            const expired = days < 0;
+            return (
+              <div key={l.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50">
+                      <FileText className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-semibold text-slate-900">{l.tenantName}</p>
+                        {expiringSoon && !expired && (
+                          <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">Expires in {days}d</span>
+                        )}
+                        {expired && (
+                          <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">Expired</span>
+                        )}
+                        {!expiringSoon && !expired && (
+                          <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">{l.status}</span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 text-sm text-slate-500">{l.propertyName}</p>
+                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                        <span>{l.tenantEmail}</span>
+                        {l.tenantPhone && <span>{l.tenantPhone}</span>}
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-500">
+                        <span><span className="font-medium text-slate-700">Lease:</span> {fmt(l.startDate)} – {fmt(l.endDate)}</span>
+                        <span><span className="font-medium text-slate-700">Rent:</span> ${l.rentAmount.toLocaleString()}/mo</span>
+                        {l.depositAmount > 0 && <span><span className="font-medium text-slate-700">Deposit:</span> ${l.depositAmount.toLocaleString()}</span>}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-semibold text-slate-900">{l.tenantName}</p>
-                      {expiringSoon && !expired && (
-                        <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">Expires in {days}d</span>
-                      )}
-                      {expired && (
-                        <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">Expired</span>
-                      )}
-                      {!expiringSoon && !expired && (
-                        <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">Active</span>
-                      )}
-                      {l.agreementType && (
-                        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">{l.agreementType}</span>
-                      )}
-                    </div>
-                    <p className="mt-0.5 text-sm text-slate-500">{l.unit} · {l.property}</p>
-                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-                      <span>{l.tenantEmail}</span>
-                      {l.tenantPhone && <span>{l.tenantPhone}</span>}
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-500">
-                      <span><span className="font-medium text-slate-700">Lease:</span> {fmt(l.startDate)} – {fmt(l.endDate)}</span>
-                      <span><span className="font-medium text-slate-700">Rent:</span> ${Number(l.rent).toLocaleString()}/mo</span>
-                      {l.deposit && <span><span className="font-medium text-slate-700">Deposit:</span> ${Number(l.deposit).toLocaleString()}</span>}
-                    </div>
-                  </div>
+                  <ActionsMenu
+                    onView={() => setViewLease(l)}
+                    onEdit={() => openEditForm(l)}
+                    onDelete={() => setDeleteTargetId(l.id)}
+                  />
                 </div>
-                <ActionsMenu
-                  onView={() => setViewLease(l)}
-                  onEdit={() => openEditForm(l)}
-                  onDelete={() => setDeleteTargetId(l.id)}
-                />
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {viewLease && (
         <ViewLeaseModal

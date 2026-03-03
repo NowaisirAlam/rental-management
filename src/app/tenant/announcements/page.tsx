@@ -1,80 +1,99 @@
 "use client";
 
-import { useState } from "react";
-import { Bell, AlertTriangle, Info, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Bell, AlertTriangle, Info, AlertCircle, Loader2 } from "lucide-react";
 
-// ── Dummy data ─────────────────────────────────────────────────────────────────
+// ── Types ──────────────────────────────────────────────────────────────────────
 
-type Priority = "urgent" | "warning" | "info";
+type Priority = "URGENT" | "WARNING" | "INFO";
 
-const initialAnnouncements = [
-  {
-    id: 1,
-    title: "Emergency: Gas Line Inspection — Feb 5",
-    body: "A mandatory gas line safety inspection will be conducted on Feb 5 from 8 AM – 4 PM. Please ensure someone is home or contact management to make arrangements.",
-    priority: "urgent" as Priority,
-    date: "Jan 31, 2026",
-    unread: true,
-  },
-  {
-    id: 2,
-    title: "Scheduled Water Shut-Off — Feb 3",
-    body: "Building maintenance will temporarily shut off water to all units on Feb 3, 2026 between 9 AM and 12 PM for pipe repairs in the main line. We apologize for the inconvenience.",
-    priority: "warning" as Priority,
-    date: "Jan 29, 2026",
-    unread: true,
-  },
-  {
-    id: 3,
-    title: "Lobby Renovation Complete",
-    body: "We're thrilled to announce that the lobby renovation project is officially complete! The new seating area, lighting, and mail room are now open for residents.",
-    priority: "info" as Priority,
-    date: "Jan 25, 2026",
-    unread: false,
-  },
-  {
-    id: 4,
-    title: "Parking Lot Resurfacing — Jan 20–21",
-    body: "The visitor parking lot will be closed on Jan 20–21 for resurfacing. Resident parking will remain unaffected. Please plan accordingly.",
-    priority: "warning" as Priority,
-    date: "Jan 18, 2026",
-    unread: false,
-  },
-  {
-    id: 5,
-    title: "Rent Payment Reminder",
-    body: "This is a friendly reminder that monthly rent is due on the 1st of each month. A grace period of 5 days applies before late fees are assessed.",
-    priority: "info" as Priority,
-    date: "Jan 1, 2026",
-    unread: false,
-  },
-];
+type Announcement = {
+  id: string;
+  title: string;
+  body: string;
+  priority: Priority;
+  date: string;
+  unread: boolean;
+};
 
-// ── Priority config ────────────────────────────────────────────────────────────
+type ApiAnnouncement = {
+  id: string;
+  title: string;
+  message: string;
+  priority: Priority;
+  createdAt: string;
+};
+
+// ── Config ─────────────────────────────────────────────────────────────────────
 
 const priorityCfg: Record<Priority, { badge: string; icon: React.ElementType; border: string; iconColor: string }> = {
-  urgent:  { badge: "bg-red-100    text-red-700",    icon: AlertCircle,  border: "border-red-200",    iconColor: "text-red-500"    },
-  warning: { badge: "bg-amber-100  text-amber-700",  icon: AlertTriangle, border: "border-amber-200", iconColor: "text-amber-500"  },
-  info:    { badge: "bg-blue-100   text-blue-700",   icon: Info,          border: "border-slate-200",  iconColor: "text-blue-500"   },
+  URGENT:  { badge: "bg-red-100   text-red-700",   icon: AlertCircle,   border: "border-red-200",   iconColor: "text-red-500"   },
+  WARNING: { badge: "bg-amber-100 text-amber-700", icon: AlertTriangle, border: "border-amber-200", iconColor: "text-amber-500" },
+  INFO:    { badge: "bg-blue-100  text-blue-700",  icon: Info,          border: "border-slate-200", iconColor: "text-blue-500"  },
 };
 
 const priorityLabel: Record<Priority, string> = {
-  urgent:  "Urgent",
-  warning: "Notice",
-  info:    "Info",
+  URGENT:  "Urgent",
+  WARNING: "Notice",
+  INFO:    "Info",
 };
+
+const fmt = (d: string) =>
+  new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function AnnouncementsPage() {
-  const [items, setItems] = useState(initialAnnouncements);
+  const [items,   setItems]   = useState<Announcement[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState<string | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/announcements");
+        if (!res.ok) throw new Error("Failed to load");
+        const data = await res.json() as ApiAnnouncement[];
+        setItems(
+          data.map((a) => ({
+            id:       a.id,
+            title:    a.title,
+            body:     a.message,
+            priority: a.priority,
+            date:     fmt(a.createdAt),
+            unread:   true,
+          }))
+        );
+      } catch {
+        setError("Could not load announcements. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const unreadCount = items.filter((a) => a.unread).length;
 
   const markAllRead = () => setItems((prev) => prev.map((a) => ({ ...a, unread: false })));
-
-  const markRead = (id: number) =>
+  const markRead    = (id: string) =>
     setItems((prev) => prev.map((a) => (a.id === id ? { ...a, unread: false } : a)));
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="px-8 py-8 max-w-3xl mx-auto">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-8 py-8 max-w-3xl mx-auto">
@@ -101,9 +120,19 @@ export default function AnnouncementsPage() {
         )}
       </div>
 
+      {/* Empty state */}
+      {items.length === 0 && (
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
+          <Bell className="mx-auto h-8 w-8 text-slate-300" />
+          <p className="mt-3 text-sm font-medium text-slate-500">No announcements</p>
+          <p className="mt-1 text-xs text-slate-400">Your landlord hasn&apos;t posted any announcements yet.</p>
+        </div>
+      )}
+
+      {/* List */}
       <div className="space-y-4">
         {items.map((a) => {
-          const cfg = priorityCfg[a.priority];
+          const cfg  = priorityCfg[a.priority];
           const Icon = cfg.icon;
           return (
             <div
@@ -120,9 +149,7 @@ export default function AnnouncementsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-sm font-semibold text-slate-900 leading-snug">
-                        {a.title}
-                      </h3>
+                      <h3 className="text-sm font-semibold text-slate-900 leading-snug">{a.title}</h3>
                       {a.unread && (
                         <span className="inline-block h-2 w-2 rounded-full bg-blue-600 flex-shrink-0" />
                       )}
