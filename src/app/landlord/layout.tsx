@@ -4,13 +4,12 @@ import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import LandlordSidebar from "@/components/landlord/sidebar";
-import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 function LandlordShell({ children }: { children: React.ReactNode }) {
-  const { resolvedTheme } = useTheme();
   return (
     <div
-      data-theme={resolvedTheme}
+      data-theme="dark"
       className="min-h-screen flex bg-slate-50 overflow-hidden"
     >
       <LandlordSidebar />
@@ -34,8 +33,8 @@ export default function LandlordLayout({ children }: { children: React.ReactNode
 
   if (status === "loading" || !session || session.user.role !== "LANDLORD") {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+      <div className="flex h-screen items-center justify-center bg-[#0f0f10]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#5e6ad2] border-t-transparent" />
       </div>
     );
   }
