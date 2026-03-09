@@ -18,9 +18,9 @@ type ApiPayment = {
 };
 
 const statusConfig: Record<DisplayStatus, string> = {
-  Paid:    "bg-green-100 text-green-700",
-  Pending: "bg-amber-100 text-amber-700",
-  Overdue: "bg-red-100 text-red-700",
+  Paid:    "bg-[#0d2818] text-[#30d158]",
+  Pending: "bg-[#2a1e00] text-[#ff9f0a]",
+  Overdue: "bg-[#2a0d0d] text-[#ff453a]",
 };
 
 const selectClass = "appearance-none rounded-lg border border-slate-300 bg-white pl-3 pr-8 py-2 text-sm text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
@@ -144,10 +144,10 @@ export default function LandlordPayments() {
       {/* Summary chips */}
       <div className="mb-6 flex flex-wrap gap-3">
         {[
-          { label: "Total",   val: `$${total.toLocaleString()}`, color: "bg-blue-50  text-blue-700"  },
-          { label: "Paid",    val: String(paid),                  color: "bg-green-50 text-green-700" },
-          { label: "Pending", val: String(pending),               color: "bg-amber-50 text-amber-700" },
-          { label: "Overdue", val: String(overdue),               color: "bg-red-50   text-red-700"   },
+          { label: "Total",   val: `$${total.toLocaleString()}`, color: "bg-[#0d1829] text-[#5e6ad2]" },
+          { label: "Paid",    val: String(paid),                  color: "bg-[#0d2818] text-[#30d158]" },
+          { label: "Pending", val: String(pending),               color: "bg-[#2a1e00] text-[#ff9f0a]" },
+          { label: "Overdue", val: String(overdue),               color: "bg-[#2a0d0d] text-[#ff453a]" },
         ].map((c) => (
           <div key={c.label} className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold ${c.color}`}>
             {c.label}: {c.val}
