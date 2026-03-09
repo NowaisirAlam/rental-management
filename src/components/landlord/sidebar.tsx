@@ -17,29 +17,14 @@ import {
 } from "lucide-react";
 
 const NAV_ITEMS = [
-  { href: "/landlord/dashboard",     icon: LayoutDashboard, label: "Dashboard"    },
-  { href: "/landlord/payments",      icon: DollarSign,      label: "Payments"     },
-  { href: "/landlord/maintenance",   icon: Wrench,          label: "Maintenance"  },
-  { href: "/landlord/properties",    icon: Home,            label: "Properties"   },
-  { href: "/landlord/leases",        icon: FileText,        label: "Leases"       },
-  { href: "/landlord/announcements", icon: Bell,            label: "Announcements"},
-  { href: "/landlord/profile",       icon: User,            label: "Profile"      },
+  { href: "/landlord/dashboard",     icon: LayoutDashboard, label: "Dashboard"     },
+  { href: "/landlord/payments",      icon: DollarSign,      label: "Payments"      },
+  { href: "/landlord/maintenance",   icon: Wrench,          label: "Maintenance"   },
+  { href: "/landlord/properties",    icon: Home,            label: "Properties"    },
+  { href: "/landlord/leases",        icon: FileText,        label: "Leases"        },
+  { href: "/landlord/announcements", icon: Bell,            label: "Announcements" },
+  { href: "/landlord/profile",       icon: User,            label: "Profile"       },
 ];
-
-// ── Tooltip ──────────────────────────────────────────────────────────────────
-
-function Tooltip({ label }: { label: string }) {
-  return (
-    <div className="pointer-events-none absolute left-full ml-3 z-50 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-      <div className="relative flex items-center">
-        <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-800" />
-        <div className="bg-slate-800 text-white text-xs font-medium px-2.5 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
-          {label}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ── Nav link ─────────────────────────────────────────────────────────────────
 
@@ -55,17 +40,16 @@ function NavItem({
   isActive: boolean;
 }) {
   return (
-    <Link href={href} className="group relative flex items-center justify-center w-full py-0.5">
-      <div
-        className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 ${
-          isActive
-            ? "bg-[#1e1e2e] text-[#5e6ad2]"
-            : "text-[#8a8a8e] hover:bg-[#1c1c1e] hover:text-[#f2f2f7]"
-        }`}
-      >
-        <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
-      </div>
-      <Tooltip label={label} />
+    <Link
+      href={href}
+      className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${
+        isActive
+          ? "bg-[#1e1e2e] text-[#5e6ad2]"
+          : "text-[#8a8a8e] hover:bg-[#1c1c1e] hover:text-[#f2f2f7]"
+      }`}
+    >
+      <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={isActive ? 2.5 : 2} />
+      {label}
     </Link>
   );
 }
@@ -134,20 +118,20 @@ export default function LandlordSidebar() {
 
   return (
     <>
-      <aside className="flex h-screen w-16 shrink-0 flex-col items-center border-r border-[#2a2a2c] bg-[#141415] py-4">
+      <aside className="flex h-screen w-56 shrink-0 flex-col border-r border-[#2a2a2c] bg-[#141415] py-4 px-3">
 
         {/* Logo */}
-        <Link href="/landlord/dashboard" className="group relative flex items-center justify-center mb-5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#5e6ad2] to-[#4a54b8] shadow-md transition-all group-hover:shadow-lg">
-            <Building2 className="h-5 w-5 text-white" strokeWidth={2.5} />
+        <Link href="/landlord/dashboard" className="flex items-center gap-3 px-2 mb-5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#5e6ad2] to-[#4a54b8] shadow-md">
+            <Building2 className="h-4 w-4 text-white" strokeWidth={2.5} />
           </div>
-          <Tooltip label="PropManager" />
+          <span className="text-[15px] font-semibold text-[#f2f2f7]">PropManager</span>
         </Link>
 
-        <div className="w-8 border-t border-[#2a2a2c] mb-4" />
+        <div className="border-t border-[#2a2a2c] mb-3 mx-2" />
 
         {/* Nav */}
-        <nav className="flex flex-col items-center gap-1 flex-1 w-full px-3">
+        <nav className="flex flex-col gap-0.5 flex-1 w-full">
           {NAV_ITEMS.map((item) => (
             <NavItem
               key={item.href}
@@ -158,15 +142,13 @@ export default function LandlordSidebar() {
             />
           ))}
 
-          {/* Power / logout — sits directly below Profile */}
+          {/* Logout */}
           <button
             onClick={() => setShowLogoutModal(true)}
-            className="group relative flex items-center justify-center w-full py-0.5"
+            className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-[15px] font-medium text-[#8a8a8e] hover:bg-[#2a1515] hover:text-[#ff453a] transition-all duration-150"
           >
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl text-[#8a8a8e] hover:bg-[#2a1515] hover:text-[#ff453a] transition-all duration-200">
-              <Power className="h-5 w-5" strokeWidth={2} />
-            </div>
-            <Tooltip label="Log out" />
+            <Power className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
+            Log out
           </button>
         </nav>
 
