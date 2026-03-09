@@ -60,7 +60,7 @@ function StatCard({
   helper: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-slate-200 bg-white p-5">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
@@ -78,16 +78,16 @@ function StatCard({
 // ── Status helpers ───────────────────────────────────────────────────────────
 
 const paymentStatusColor: Record<string, string> = {
-  PAID: "bg-green-100 text-green-700",
-  PENDING: "bg-amber-100 text-amber-700",
-  LATE: "bg-red-100 text-red-700",
+  PAID: "bg-[#0d2818] text-[#30d158]",
+  PENDING: "bg-[#2a1e00] text-[#ff9f0a]",
+  LATE: "bg-[#2a0d0d] text-[#ff453a]",
 };
 
 const maintenanceStatusColor: Record<string, string> = {
-  OPEN: "bg-blue-100 text-blue-700",
-  IN_PROGRESS: "bg-amber-100 text-amber-700",
-  RESOLVED: "bg-green-100 text-green-700",
-  CLOSED: "bg-slate-100 text-slate-600",
+  OPEN: "bg-[#0d1829] text-[#5e6ad2]",
+  IN_PROGRESS: "bg-[#2a1e00] text-[#ff9f0a]",
+  RESOLVED: "bg-[#0d2818] text-[#30d158]",
+  CLOSED: "bg-[#1c1c1e] text-[#8a8a8e]",
 };
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -131,7 +131,6 @@ export default function LandlordDashboard() {
 
   const { stats, recentPayments, recentMaintenance } = data;
   const userName = session?.user?.name?.split(" ")[0] ?? "there";
-  const displayName = session?.user?.name?.trim() || "there";
 
   return (
     <div className="mx-auto w-full max-w-[1280px] px-6 py-8 lg:px-10">
@@ -139,7 +138,6 @@ export default function LandlordDashboard() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">Welcome back, {userName}</h1>
-        <h1 className="text-2xl font-bold text-slate-900">Welcome back, {displayName}</h1>
         <p className="mt-1 text-sm text-slate-500">
           Here&apos;s an overview of your properties for {new Date().toLocaleString("en-US", { month: "long", year: "numeric" })}.
         </p>
@@ -149,32 +147,32 @@ export default function LandlordDashboard() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatCard
           icon={DollarSign}
-          iconBg="bg-green-50"
-          iconColor="text-green-600"
+          iconBg="bg-[#0d2818]"
+          iconColor="text-[#30d158]"
           label="Rent Received"
           value={`$${stats.totalRevenue.toLocaleString()}`}
           helper="Total collected"
         />
         <StatCard
           icon={Clock}
-          iconBg="bg-amber-50"
-          iconColor="text-amber-600"
+          iconBg="bg-[#2a1e00]"
+          iconColor="text-[#ff9f0a]"
           label="Pending Payments"
           value={String(stats.pendingPayments)}
           helper="Awaiting payment"
         />
         <StatCard
           icon={Home}
-          iconBg="bg-blue-50"
-          iconColor="text-blue-600"
+          iconBg="bg-[#0d1829]"
+          iconColor="text-[#5e6ad2]"
           label="Properties"
           value={String(stats.totalProperties)}
           helper="Total properties"
         />
         <StatCard
           icon={Wrench}
-          iconBg="bg-red-50"
-          iconColor="text-red-500"
+          iconBg="bg-[#2a0d0d]"
+          iconColor="text-[#ff453a]"
           label="Open Tickets"
           value={String(stats.openMaintenance)}
           helper="Active requests"
@@ -182,12 +180,12 @@ export default function LandlordDashboard() {
       </div>
 
       {/* Quick actions */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm mb-6">
+      <div className="rounded-xl border border-slate-200 bg-white p-6 mb-6">
         <h2 className="mb-4 text-sm font-semibold text-slate-700">Quick Actions</h2>
         <div className="flex flex-wrap gap-3">
           <Link
             href="/landlord/properties"
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#5e6ad2] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95"
           >
             <Plus className="h-4 w-4" /> Add New Property
           </Link>
@@ -216,10 +214,10 @@ export default function LandlordDashboard() {
       <div className="grid gap-6 lg:grid-cols-2">
 
         {/* Recent payments */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white p-6">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-700">Recent Payments</h2>
-            <Link href="/landlord/payments" className="text-xs font-medium text-blue-600 hover:underline">
+            <Link href="/landlord/payments" className="text-xs font-medium text-[#5e6ad2] hover:underline">
               View all
             </Link>
           </div>
@@ -247,10 +245,10 @@ export default function LandlordDashboard() {
         </div>
 
         {/* Recent maintenance */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white p-6">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-700">Recent Maintenance</h2>
-            <Link href="/landlord/maintenance" className="text-xs font-medium text-blue-600 hover:underline">
+            <Link href="/landlord/maintenance" className="text-xs font-medium text-[#5e6ad2] hover:underline">
               View all
             </Link>
           </div>
