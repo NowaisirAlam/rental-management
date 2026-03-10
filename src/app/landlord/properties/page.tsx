@@ -540,13 +540,13 @@ export default function LandlordProperties() {
                     <p className="font-semibold text-slate-900">{p.name}</p>
                     <p className="text-sm text-slate-500">{p.address}</p>
                     <div className="mt-2 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-600">
+                      <span className="rounded-full bg-[#0d1829] px-2.5 py-0.5 text-xs font-medium text-[#5e6ad2]">
                         {p.tenants.length} tenant{p.tenants.length !== 1 ? 's' : ''}
                       </span>
-                      <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                      <span className="rounded-full bg-[#2a1e00] px-2.5 py-0.5 text-xs font-medium text-[#ff9f0a]">
                         {p._count.maintenanceRequests} request{p._count.maintenanceRequests !== 1 ? 's' : ''}
                       </span>
-                      <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                      <span className="rounded-full bg-[#0d2818] px-2.5 py-0.5 text-xs font-medium text-[#30d158]">
                         {p._count.rentPayments} payment{p._count.rentPayments !== 1 ? 's' : ''}
                       </span>
                     </div>
