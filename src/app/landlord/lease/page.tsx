@@ -26,10 +26,10 @@ const defaultOccupants: Occupant[] = [
 
 // ── Shared styles ─────────────────────────────────────────────────────────────
 
-const inputClass  = "mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
-const selectClass = "mt-1.5 w-full appearance-none rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
-const labelClass  = "text-xs font-medium text-slate-400 uppercase tracking-wide";
-const inlineInput = "w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+const inputClass  = "mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+const selectClass = "mt-1.5 w-full appearance-none rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+const labelClass  = "text-sm font-medium text-slate-400 uppercase tracking-wide";
+const inlineInput = "w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-base text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -37,7 +37,7 @@ function SectionTitle({ title }: { title: string }) {
   return (
     <div className="mt-8 flex items-center gap-3">
       <div className="flex-1 border-t border-slate-200" />
-      <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">{title}</span>
+      <span className="text-sm font-semibold uppercase tracking-wider text-slate-400">{title}</span>
       <div className="flex-1 border-t border-slate-200" />
     </div>
   );
@@ -85,7 +85,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl bg-slate-900 px-5 py-3 text-white shadow-xl">
       <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0" />
-      <span className="text-sm font-medium">{message}</span>
+      <span className="text-base font-medium">{message}</span>
       <button onClick={onClose} className="ml-2 text-slate-400 hover:text-white transition"><X className="h-4 w-4" /></button>
     </div>
   );
@@ -163,11 +163,11 @@ export default function LandlordLeasePage() {
     <div className="px-8 pb-8 max-w-4xl mx-auto">
 
       <div className="mb-2">
-        <h1 className="text-2xl font-bold text-slate-900">Lease Details</h1>
-        <p className="mt-1 text-sm text-slate-500">Edit and manage all lease agreement details.</p>
+        <h1 className="text-3xl font-bold text-slate-900">Lease Details</h1>
+        <p className="mt-1 text-base text-slate-500">Edit and manage all lease agreement details.</p>
       </div>
 
-      <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600">
+      <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-600">
         <Pencil className="h-3 w-3" /> All fields are editable
       </div>
 
@@ -247,8 +247,8 @@ export default function LandlordLeasePage() {
                     : "bg-slate-50 ring-1 ring-slate-200 hover:bg-slate-100"
                 }`}
               >
-                <span className="text-sm font-medium text-slate-700">{u.name}</span>
-                <span className={`text-xs font-semibold ${u.included ? "text-green-600" : "text-slate-400"}`}>
+                <span className="text-base font-medium text-slate-700">{u.name}</span>
+                <span className={`text-sm font-semibold ${u.included ? "text-green-600" : "text-slate-400"}`}>
                   {u.included ? "Included" : "Not included"}
                 </span>
               </button>
@@ -262,7 +262,7 @@ export default function LandlordLeasePage() {
             {/* Existing occupant rows */}
             {occupants.map((o) => (
               <div key={o.id} className="flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-3">
-                <div className="h-8 w-8 flex-shrink-0 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
+                <div className="h-8 w-8 flex-shrink-0 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-600">
                   {o.name.split(" ").map((n) => n[0]).join("").toUpperCase()}
                 </div>
                 <div className="flex-1 grid gap-3 sm:grid-cols-2">
@@ -336,10 +336,10 @@ export default function LandlordLeasePage() {
           {/* Documents */}
           <SectionTitle title="Documents" />
           <div className="mt-5 flex flex-wrap gap-3">
-            <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-95">
+            <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-95">
               <FileText className="h-4 w-4" /> View Lease PDF
             </button>
-            <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-95">
+            <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-95">
               <Download className="h-4 w-4" /> Download Lease PDF
             </button>
           </div>
@@ -350,13 +350,13 @@ export default function LandlordLeasePage() {
         <div className="mt-6 flex items-center gap-3">
           <button
             type="submit"
-            className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
+            className="rounded-lg bg-blue-600 px-6 py-2.5 text-base font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
           >
             Save Changes
           </button>
           <button
             type="button"
-            className="rounded-lg border border-slate-300 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95"
+            className="rounded-lg border border-slate-300 bg-white px-6 py-2.5 text-base font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95"
           >
             Cancel
           </button>
