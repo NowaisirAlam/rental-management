@@ -23,7 +23,7 @@ type Property = { id: string; name: string };
 
 const priorityConfig: Record<Priority, { badge: string; dot: string; label: string }> = {
   INFO:    { badge: "bg-blue-100 text-blue-700",   dot: "bg-blue-500",   label: "Info"    },
-  WARNING: { badge: "bg-amber-100 text-amber-700", dot: "bg-amber-500",  label: "Warning" },
+  WARNING: { badge: "bg-[#2a1e00] text-[#ff9f0a]", dot: "bg-[#ff9f0a]",  label: "Warning" },
   URGENT:  { badge: "bg-red-100 text-red-700",     dot: "bg-red-500",    label: "Urgent"  },
 };
 
