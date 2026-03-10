@@ -177,7 +177,7 @@ export default function LandlordProfile() {
             {avatarSrc ? (
               <img src={avatarSrc} alt="Profile" className="h-20 w-20 rounded-full object-cover ring-2 ring-slate-200" />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white ring-2 ring-slate-200">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#5e6ad2] text-xl font-bold text-white ring-2 ring-slate-200">
                 {initials || <User className="h-8 w-8" />}
               </div>
             )}
@@ -205,7 +205,7 @@ export default function LandlordProfile() {
         <h2 className="mb-5 text-sm font-semibold text-slate-700">Personal Information</h2>
         {profileLoading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+            <Loader2 className="h-5 w-5 animate-spin text-[#5e6ad2]" />
           </div>
         ) : (
           <form onSubmit={handleInfoSave} className="space-y-4">
@@ -227,7 +227,7 @@ export default function LandlordProfile() {
               <label className={labelClass}>Phone Number</label>
               <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 (416) 555-0000" className={inputClass} />
             </div>
-            <button type="submit" disabled={infoSaving} className="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95 disabled:opacity-50">
+            <button type="submit" disabled={infoSaving} className="w-full rounded-lg bg-[#5e6ad2] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95 disabled:opacity-50">
               {infoSaving ? "Saving…" : "Save Changes"}
             </button>
           </form>
@@ -246,7 +246,7 @@ export default function LandlordProfile() {
             <label className={labelClass}>Contact Phone</label>
             <input type="tel" value={emergPhone} onChange={(e) => setEmergPhone(e.target.value)} placeholder="+1 (416) 555-0000" className={inputClass} />
           </div>
-          <button type="submit" className="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95">
+          <button type="submit" className="w-full rounded-lg bg-[#5e6ad2] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95">
             Save Changes
           </button>
         </form>
@@ -273,7 +273,7 @@ export default function LandlordProfile() {
               <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
             </div>
           </div>
-          <button type="submit" className="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95">
+          <button type="submit" className="w-full rounded-lg bg-[#5e6ad2] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95">
             Save Changes
           </button>
         </form>
@@ -350,7 +350,7 @@ export default function LandlordProfile() {
               ))}
             </div>
           </div>
-          <button type="button" onClick={() => showToast("Preferences saved.")} className="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95">
+          <button type="button" onClick={() => showToast("Preferences saved.")} className="w-full rounded-lg bg-[#5e6ad2] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95">
             Save Preferences
           </button>
         </div>
@@ -377,7 +377,7 @@ export default function LandlordProfile() {
             <label className={labelClass}>Confirm New Password</label>
             <input type={showPw ? "text" : "password"} value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} required placeholder="Repeat new password" className={inputClass} />
           </div>
-          <button type="submit" disabled={pwSaving} className="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95 disabled:opacity-50">
+          <button type="submit" disabled={pwSaving} className="w-full rounded-lg bg-[#5e6ad2] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95 disabled:opacity-50">
             {pwSaving ? "Updating…" : "Update Password"}
           </button>
         </form>

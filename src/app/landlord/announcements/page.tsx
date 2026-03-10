@@ -130,7 +130,7 @@ export default function LandlordAnnouncements() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+        <Loader2 className="h-6 w-6 animate-spin text-[#5e6ad2]" />
       </div>
     );
   }
@@ -154,7 +154,7 @@ export default function LandlordAnnouncements() {
         </div>
         <button
           onClick={() => setShowForm((v) => !v)}
-          className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#5e6ad2] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95"
         >
           <Plus className="h-4 w-4" /> New Announcement
         </button>
@@ -231,7 +231,7 @@ export default function LandlordAnnouncements() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95 disabled:opacity-50"
+                className="rounded-lg bg-[#5e6ad2] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95 disabled:opacity-50"
               >
                 {submitting ? "Publishing…" : "Publish"}
               </button>

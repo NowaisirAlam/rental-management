@@ -118,17 +118,15 @@ export default function LandlordSidebar() {
 
   return (
     <>
-      <aside className="flex h-screen w-56 shrink-0 flex-col border-r border-[#2a2a2c] bg-[#141415] py-4 px-3">
+      <aside className="flex h-screen w-56 shrink-0 flex-col bg-[#0f0f10] py-4 px-3">
 
         {/* Logo */}
         <Link href="/landlord/dashboard" className="flex items-center gap-3 px-2 mb-5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#5e6ad2] to-[#4a54b8] shadow-md">
-            <Building2 className="h-4 w-4 text-white" strokeWidth={2.5} />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#5e6ad2] to-[#4a54b8] shadow-md">
+            <Building2 className="h-6 w-6 text-white" strokeWidth={2.5} />
           </div>
-          <span className="text-[15px] font-semibold text-[#f2f2f7]">PropManager</span>
+          <span className="text-xl font-semibold text-[#f2f2f7]">PropManager</span>
         </Link>
-
-        <div className="border-t border-[#2a2a2c] mb-3 mx-2" />
 
         {/* Nav */}
         <nav className="flex flex-col gap-0.5 flex-1 w-full">
