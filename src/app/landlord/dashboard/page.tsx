@@ -133,7 +133,7 @@ export default function LandlordDashboard() {
   const userName = session?.user?.name?.split(" ")[0] ?? "there";
 
   return (
-    <div className="mx-auto w-full max-w-[1280px] px-6 py-8 lg:px-10">
+    <div className="mx-auto w-full max-w-[1280px] px-6 pb-8 lg:px-10">
 
       {/* Header */}
       <div className="mb-8">

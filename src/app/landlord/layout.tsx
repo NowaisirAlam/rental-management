@@ -13,7 +13,7 @@ function LandlordShell({ children }: { children: React.ReactNode }) {
       className="min-h-screen flex bg-slate-50 overflow-hidden"
     >
       <LandlordSidebar />
-      <main className="flex-1 min-w-0 w-full overflow-y-auto">
+      <main className="flex-1 min-w-0 w-full overflow-y-auto pt-12">
         {children}
       </main>
     </div>

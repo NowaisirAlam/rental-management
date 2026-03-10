@@ -163,7 +163,7 @@ export default function LandlordProfile() {
   };
 
   return (
-    <div className="px-8 py-8 max-w-3xl mx-auto">
+    <div className="px-8 pb-8 max-w-3xl mx-auto">
 
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">Profile</h1>

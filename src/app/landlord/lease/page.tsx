@@ -160,7 +160,7 @@ export default function LandlordLeasePage() {
   };
 
   return (
-    <div className="px-8 py-8 max-w-4xl mx-auto">
+    <div className="px-8 pb-8 max-w-4xl mx-auto">
 
       <div className="mb-2">
         <h1 className="text-2xl font-bold text-slate-900">Lease Details</h1>

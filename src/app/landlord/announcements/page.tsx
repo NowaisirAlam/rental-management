@@ -137,14 +137,14 @@ export default function LandlordAnnouncements() {
 
   if (error) {
     return (
-      <div className="px-8 py-8 max-w-3xl mx-auto">
+      <div className="px-8 pb-8 max-w-3xl mx-auto">
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="px-8 py-8 max-w-3xl mx-auto">
+    <div className="px-8 pb-8 max-w-3xl mx-auto">
 
       {/* Header */}
       <div className="mb-8 flex items-start justify-between">

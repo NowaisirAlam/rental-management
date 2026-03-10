@@ -210,7 +210,7 @@ export default function LandlordMaintenance() {
   }
 
   return (
-    <div className="px-8 py-8 max-w-4xl mx-auto">
+    <div className="px-8 pb-8 max-w-4xl mx-auto">
 
       {/* Header */}
       <div className="mb-8 flex items-start justify-between">
