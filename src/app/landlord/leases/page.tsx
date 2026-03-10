@@ -667,7 +667,7 @@ export default function LandlordLeases() {
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-semibold text-slate-900">{l.tenantName}</p>
                         {expiringSoon && !expired && (
-                          <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">Expires in {days}d</span>
+                          <span className="rounded-full bg-[#2a1e00] px-2.5 py-0.5 text-xs font-semibold text-[#ff9f0a]">Expires in {days}d</span>
                         )}
                         {expired && (
                           <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">Expired</span>
