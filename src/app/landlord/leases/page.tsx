@@ -241,7 +241,7 @@ function ViewLeaseModal({ lease, onClose, onEdit }: { lease: Lease; onClose: () 
           <button onClick={onClose} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95">
             Close
           </button>
-          <button onClick={() => { onClose(); onEdit(); }} className="rounded-lg bg-[#5e6ad2] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95">
+          <button onClick={() => { onClose(); onEdit(); }} className="rounded-lg bg-[#1e1e2e] px-4 py-2 text-sm font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95">
             Edit Lease
           </button>
         </div>
@@ -489,7 +489,7 @@ export default function LandlordLeases() {
         </div>
         <button
           onClick={() => { resetForm(); setEditingId(null); setShowForm((v) => !v); }}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#5e6ad2] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#1e1e2e] px-4 py-2.5 text-sm font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95"
         >
           <Plus className="h-4 w-4" /> Add Lease
         </button>
@@ -621,7 +621,7 @@ export default function LandlordLeases() {
                     className={inlineInput} />
                 </div>
                 <button type="button" onClick={addOccupant}
-                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-[#5e6ad2] text-white transition hover:bg-[#4a54b8] active:scale-95">
+                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-[#1e1e2e] text-[#818cf8] transition hover:bg-[#252535] active:scale-95">
                   <Plus className="h-4 w-4" />
                 </button>
               </div>
@@ -631,7 +631,7 @@ export default function LandlordLeases() {
           {/* Form actions */}
           <div className="mt-5 flex items-center gap-3">
             <button type="submit" disabled={saving}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#5e6ad2] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95 disabled:opacity-60">
+              className="inline-flex items-center gap-2 rounded-lg bg-[#1e1e2e] px-6 py-2.5 text-sm font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95 disabled:opacity-60">
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               {editingId !== null ? "Save Changes" : "Create Lease"}
             </button>
