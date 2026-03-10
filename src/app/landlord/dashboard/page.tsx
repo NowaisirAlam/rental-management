@@ -185,7 +185,7 @@ export default function LandlordDashboard() {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/landlord/properties"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#5e6ad2] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#1e1e2e] px-4 py-2.5 text-sm font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95"
           >
             <Plus className="h-4 w-4" /> Add New Property
           </Link>
