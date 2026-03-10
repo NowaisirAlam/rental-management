@@ -154,7 +154,7 @@ export default function LandlordAnnouncements() {
         </div>
         <button
           onClick={() => setShowForm((v) => !v)}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#5e6ad2] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#1e1e2e] px-4 py-2.5 text-sm font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95"
         >
           <Plus className="h-4 w-4" /> New Announcement
         </button>
@@ -231,7 +231,7 @@ export default function LandlordAnnouncements() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="rounded-lg bg-[#5e6ad2] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95 disabled:opacity-50"
+                className="rounded-lg bg-[#1e1e2e] px-5 py-2.5 text-sm font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95 disabled:opacity-50"
               >
                 {submitting ? "Publishing…" : "Publish"}
               </button>
