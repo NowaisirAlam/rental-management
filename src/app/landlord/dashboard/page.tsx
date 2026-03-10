@@ -60,12 +60,12 @@ function StatCard({
   helper: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-slate-200 bg-white p-5">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-          <p className="mt-2 text-3xl font-bold text-slate-900">{value}</p>
-          <p className="mt-1 text-xs text-slate-400">{helper}</p>
+          <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+          <p className="mt-2 text-4xl font-bold text-slate-900">{value}</p>
+          <p className="mt-1 text-sm text-slate-400">{helper}</p>
         </div>
         <div className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${iconBg}`}>
           <Icon className={`h-5 w-5 ${iconColor}`} strokeWidth={2} />
@@ -78,16 +78,16 @@ function StatCard({
 // ── Status helpers ───────────────────────────────────────────────────────────
 
 const paymentStatusColor: Record<string, string> = {
-  PAID: "bg-green-100 text-green-700",
-  PENDING: "bg-amber-100 text-amber-700",
-  LATE: "bg-red-100 text-red-700",
+  PAID: "bg-[#0d2818] text-[#30d158]",
+  PENDING: "bg-[#2a1e00] text-[#ff9f0a]",
+  LATE: "bg-[#2a0d0d] text-[#ff453a]",
 };
 
 const maintenanceStatusColor: Record<string, string> = {
-  OPEN: "bg-blue-100 text-blue-700",
-  IN_PROGRESS: "bg-amber-100 text-amber-700",
-  RESOLVED: "bg-green-100 text-green-700",
-  CLOSED: "bg-slate-100 text-slate-600",
+  OPEN: "bg-[#0d1829] text-[#5e6ad2]",
+  IN_PROGRESS: "bg-[#2a1e00] text-[#ff9f0a]",
+  RESOLVED: "bg-[#0d2818] text-[#30d158]",
+  CLOSED: "bg-[#1c1c1e] text-[#8a8a8e]",
 };
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -113,7 +113,7 @@ export default function LandlordDashboard() {
     return (
       <div className="flex items-center justify-center h-full py-32">
         <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-        <span className="ml-2 text-sm text-slate-500">Loading dashboard...</span>
+        <span className="ml-2 text-base text-slate-500">Loading dashboard...</span>
       </div>
     );
   }
@@ -121,8 +121,8 @@ export default function LandlordDashboard() {
   if (error || !data) {
     return (
       <div className="flex flex-col items-center justify-center h-full py-32">
-        <p className="text-sm text-red-600 mb-3">{error ?? "Failed to load"}</p>
-        <button onClick={() => window.location.reload()} className="text-sm text-blue-600 hover:underline">
+        <p className="text-base text-red-600 mb-3">{error ?? "Failed to load"}</p>
+        <button onClick={() => window.location.reload()} className="text-base text-blue-600 hover:underline">
           Retry
         </button>
       </div>
@@ -131,16 +131,14 @@ export default function LandlordDashboard() {
 
   const { stats, recentPayments, recentMaintenance } = data;
   const userName = session?.user?.name?.split(" ")[0] ?? "there";
-  const displayName = session?.user?.name?.trim() || "there";
 
   return (
-    <div className="mx-auto w-full max-w-[1280px] px-6 py-8 lg:px-10">
+    <div className="mx-auto w-full max-w-[1280px] px-6 pb-8 lg:px-10">
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Welcome back, {userName}</h1>
-        <h1 className="text-2xl font-bold text-slate-900">Welcome back, {displayName}</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-3xl font-bold text-slate-900">Welcome back, {userName}</h1>
+        <p className="mt-1 text-base text-slate-500">
           Here&apos;s an overview of your properties for {new Date().toLocaleString("en-US", { month: "long", year: "numeric" })}.
         </p>
       </div>
@@ -149,32 +147,32 @@ export default function LandlordDashboard() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatCard
           icon={DollarSign}
-          iconBg="bg-green-50"
-          iconColor="text-green-600"
+          iconBg="bg-[#0d2818]"
+          iconColor="text-[#30d158]"
           label="Rent Received"
           value={`$${stats.totalRevenue.toLocaleString()}`}
           helper="Total collected"
         />
         <StatCard
           icon={Clock}
-          iconBg="bg-amber-50"
-          iconColor="text-amber-600"
+          iconBg="bg-[#2a1e00]"
+          iconColor="text-[#ff9f0a]"
           label="Pending Payments"
           value={String(stats.pendingPayments)}
           helper="Awaiting payment"
         />
         <StatCard
           icon={Home}
-          iconBg="bg-blue-50"
-          iconColor="text-blue-600"
+          iconBg="bg-[#0d1829]"
+          iconColor="text-[#5e6ad2]"
           label="Properties"
           value={String(stats.totalProperties)}
           helper="Total properties"
         />
         <StatCard
           icon={Wrench}
-          iconBg="bg-red-50"
-          iconColor="text-red-500"
+          iconBg="bg-[#2a0d0d]"
+          iconColor="text-[#ff453a]"
           label="Open Tickets"
           value={String(stats.openMaintenance)}
           helper="Active requests"
@@ -182,30 +180,30 @@ export default function LandlordDashboard() {
       </div>
 
       {/* Quick actions */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-slate-700">Quick Actions</h2>
+      <div className="rounded-xl border border-slate-200 bg-white p-6 mb-6">
+        <h2 className="mb-4 text-base font-semibold text-slate-700">Quick Actions</h2>
         <div className="flex flex-wrap gap-3">
           <Link
             href="/landlord/properties"
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#1e1e2e] px-4 py-2.5 text-base font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95"
           >
             <Plus className="h-4 w-4" /> Add New Property
           </Link>
           <Link
             href="/landlord/leases"
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-base font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95"
           >
             <Users className="h-4 w-4" /> Add Tenant
           </Link>
           <Link
             href="/landlord/announcements"
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-base font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95"
           >
             <Bell className="h-4 w-4" /> Create Announcement
           </Link>
           <Link
             href="/landlord/payments"
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-base font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95"
           >
             <CreditCard className="h-4 w-4" /> View Payments
           </Link>
@@ -216,28 +214,28 @@ export default function LandlordDashboard() {
       <div className="grid gap-6 lg:grid-cols-2">
 
         {/* Recent payments */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-700">Recent Payments</h2>
-            <Link href="/landlord/payments" className="text-xs font-medium text-blue-600 hover:underline">
+            <h2 className="text-base font-semibold text-slate-700">Recent Payments</h2>
+            <Link href="/landlord/payments" className="text-sm font-medium text-[#5e6ad2] hover:underline">
               View all
             </Link>
           </div>
           <div className="space-y-3">
             {recentPayments.length === 0 && (
-              <p className="text-sm text-slate-400 py-4 text-center">No payments yet.</p>
+              <p className="text-base text-slate-400 py-4 text-center">No payments yet.</p>
             )}
             {recentPayments.map((row) => (
               <div key={row.id} className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-medium text-slate-800">{row.property.name}</p>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-base font-medium text-slate-800">{row.property.name}</p>
+                  <p className="text-sm text-slate-400">
                     {new Date(row.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-semibold text-slate-900">${row.amount.toLocaleString()}</span>
-                  <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${paymentStatusColor[row.status] ?? "bg-slate-100 text-slate-600"}`}>
+                  <span className="text-base font-semibold text-slate-900">${row.amount.toLocaleString()}</span>
+                  <span className={`inline-flex rounded-full px-2.5 py-0.5 text-sm font-semibold ${paymentStatusColor[row.status] ?? "bg-slate-100 text-slate-600"}`}>
                     {row.status}
                   </span>
                 </div>
@@ -247,24 +245,24 @@ export default function LandlordDashboard() {
         </div>
 
         {/* Recent maintenance */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-700">Recent Maintenance</h2>
-            <Link href="/landlord/maintenance" className="text-xs font-medium text-blue-600 hover:underline">
+            <h2 className="text-base font-semibold text-slate-700">Recent Maintenance</h2>
+            <Link href="/landlord/maintenance" className="text-sm font-medium text-[#5e6ad2] hover:underline">
               View all
             </Link>
           </div>
           <div className="space-y-3">
             {recentMaintenance.length === 0 && (
-              <p className="text-sm text-slate-400 py-4 text-center">No maintenance requests yet.</p>
+              <p className="text-base text-slate-400 py-4 text-center">No maintenance requests yet.</p>
             )}
             {recentMaintenance.map((t) => (
               <div key={t.id} className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-slate-800">{t.title}</p>
-                  <p className="text-xs text-slate-400">{t.property.name}</p>
+                  <p className="truncate text-base font-medium text-slate-800">{t.title}</p>
+                  <p className="text-sm text-slate-400">{t.property.name}</p>
                 </div>
-                <span className={`flex-shrink-0 inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${maintenanceStatusColor[t.status] ?? "bg-slate-100 text-slate-600"}`}>
+                <span className={`flex-shrink-0 inline-flex rounded-full px-2.5 py-0.5 text-sm font-semibold ${maintenanceStatusColor[t.status] ?? "bg-slate-100 text-slate-600"}`}>
                   {t.status}
                 </span>
               </div>

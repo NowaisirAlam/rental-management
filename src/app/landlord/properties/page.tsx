@@ -22,9 +22,9 @@ const PROPERTY_TYPES = [
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
-const inputClass  = "mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
-const selectClass = "mt-1.5 w-full appearance-none rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
-const labelClass  = "block text-xs font-medium uppercase tracking-wide text-slate-400";
+const inputClass  = "mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+const selectClass = "mt-1.5 w-full appearance-none rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+const labelClass  = "block text-sm font-medium uppercase tracking-wide text-slate-400";
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
 
@@ -32,7 +32,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl bg-slate-900 px-5 py-3 text-white shadow-xl">
       <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0" />
-      <span className="text-sm font-medium">{message}</span>
+      <span className="text-base font-medium">{message}</span>
       <button onClick={onClose} className="ml-2 text-slate-400 hover:text-white transition"><X className="h-4 w-4" /></button>
     </div>
   );
@@ -58,7 +58,7 @@ function ActionsMenu({ onView, onEdit, onDelete }: { onView: () => void; onEdit:
     return () => document.removeEventListener("keydown", handler);
   }, [open]);
 
-  const item = "flex w-full items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors rounded-lg";
+  const item = "flex w-full items-center gap-2.5 px-4 py-2 text-base text-slate-700 hover:bg-slate-50 transition-colors rounded-lg";
 
   return (
     <div ref={ref} className="relative flex-shrink-0">
@@ -79,7 +79,7 @@ function ActionsMenu({ onView, onEdit, onDelete }: { onView: () => void; onEdit:
           </button>
           <div className="my-1 border-t border-slate-100" />
           <button
-            className="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors rounded-lg"
+            className="flex w-full items-center gap-2.5 px-4 py-2 text-base text-red-600 hover:bg-red-50 transition-colors rounded-lg"
             onClick={() => { setOpen(false); onDelete(); }}
           >
             <Trash2 className="h-4 w-4" /> Delete Property
@@ -101,8 +101,8 @@ function ViewPropertyModal({ property, onClose, onEdit }: { property: Property; 
 
   const row = (label: string, value: string) => value ? (
     <div className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0">
-      <span className="w-28 flex-shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</span>
-      <span className="flex-1 text-sm text-slate-800">{value}</span>
+      <span className="w-28 flex-shrink-0 text-sm font-semibold uppercase tracking-wide text-slate-400">{label}</span>
+      <span className="flex-1 text-base text-slate-800">{value}</span>
     </div>
   ) : null;
 
@@ -112,8 +112,8 @@ function ViewPropertyModal({ property, onClose, onEdit }: { property: Property; 
       <div className="relative z-50 w-full max-w-md rounded-2xl bg-white shadow-2xl">
         <div className="flex items-start justify-between gap-4 p-6 pb-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">Property Details</p>
-            <h2 className="mt-1 text-lg font-bold text-slate-900 leading-snug">{property.name}</h2>
+            <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">Property Details</p>
+            <h2 className="mt-1 text-xl font-bold text-slate-900 leading-snug">{property.name}</h2>
           </div>
           <button onClick={onClose} className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700">
             <X className="h-4 w-4" />
@@ -126,10 +126,10 @@ function ViewPropertyModal({ property, onClose, onEdit }: { property: Property; 
           {row("Payments", `${property._count.rentPayments} payment${property._count.rentPayments !== 1 ? 's' : ''}`)}
         </div>
         <div className="flex items-center justify-end gap-3 border-t border-slate-100 px-6 py-4">
-          <button onClick={onClose} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95">
+          <button onClick={onClose} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95">
             Close
           </button>
-          <button onClick={() => { onClose(); onEdit(); }} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95">
+          <button onClick={() => { onClose(); onEdit(); }} className="rounded-lg bg-[#1e1e2e] px-4 py-2 text-base font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95">
             Edit Property
           </button>
         </div>
@@ -156,15 +156,15 @@ function ConfirmDeleteModal({ title, onCancel, onConfirm }: { title: string; onC
             <AlertTriangle className="h-5 w-5 text-red-600" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900">{title}</h3>
-            <p className="mt-1.5 text-sm text-slate-500 leading-relaxed">This action cannot be undone.</p>
+            <h3 className="text-lg font-bold text-slate-900">{title}</h3>
+            <p className="mt-1.5 text-base text-slate-500 leading-relaxed">This action cannot be undone.</p>
           </div>
         </div>
         <div className="mt-6 flex items-center justify-end gap-3">
-          <button onClick={onCancel} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95">
+          <button onClick={onCancel} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95">
             Cancel
           </button>
-          <button onClick={onConfirm} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 active:scale-95">
+          <button onClick={onConfirm} className="rounded-lg bg-red-600 px-4 py-2 text-base font-semibold text-white shadow-sm transition hover:bg-red-700 active:scale-95">
             Delete
           </button>
         </div>
@@ -349,7 +349,7 @@ export default function LandlordProperties() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-          <p className="mt-3 text-sm text-slate-500">Loading properties...</p>
+          <p className="mt-3 text-base text-slate-500">Loading properties...</p>
         </div>
       </div>
     );
@@ -362,11 +362,11 @@ export default function LandlordProperties() {
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
             <AlertTriangle className="h-6 w-6 text-red-600" />
           </div>
-          <h2 className="mt-4 text-lg font-semibold text-slate-900">Failed to load properties</h2>
-          <p className="mt-1 text-sm text-slate-500">{error}</p>
+          <h2 className="mt-4 text-xl font-semibold text-slate-900">Failed to load properties</h2>
+          <p className="mt-1 text-base text-slate-500">{error}</p>
           <button
             onClick={fetchProperties}
-            className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+            className="mt-4 rounded-lg bg-[#1e1e2e] px-4 py-2 text-base font-semibold text-[#818cf8] transition hover:bg-[#252535]"
           >
             Try Again
           </button>
@@ -376,17 +376,17 @@ export default function LandlordProperties() {
   }
 
   return (
-    <div className="px-8 py-8 max-w-4xl mx-auto">
+    <div className="px-8 pb-8 max-w-4xl mx-auto">
 
       {/* Header */}
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Properties</h1>
-          <p className="mt-1 text-sm text-slate-500">Add and manage all your properties in one place.</p>
+          <h1 className="text-3xl font-bold text-slate-900">Properties</h1>
+          <p className="mt-1 text-base text-slate-500">Add and manage all your properties in one place.</p>
         </div>
         <button
           onClick={() => { resetForm(); setEditingId(null); setShowForm((v) => !v); }}
-          className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#1e1e2e] px-4 py-2.5 text-base font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95"
         >
           <Plus className="h-4 w-4" /> Add Property
         </button>
@@ -395,7 +395,7 @@ export default function LandlordProperties() {
       {/* Add / Edit property form */}
       {showForm && (
         <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-5 text-base font-semibold text-slate-900">
+          <h2 className="mb-5 text-lg font-semibold text-slate-900">
             {editingId !== null ? "Edit Property" : "New Property"}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -466,7 +466,7 @@ export default function LandlordProperties() {
                 ) : (
                   <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-8 transition hover:border-blue-400 hover:bg-blue-50">
                     <ImagePlus className="h-6 w-6 text-slate-400" />
-                    <span className="text-xs font-medium text-slate-500">Click to upload JPG or PNG</span>
+                    <span className="text-sm font-medium text-slate-500">Click to upload JPG or PNG</span>
                     <input ref={imageInputRef} type="file" accept=".jpg,.jpeg,.png" className="hidden" onChange={handleImageUpload} />
                   </label>
                 )}
@@ -482,11 +482,11 @@ export default function LandlordProperties() {
                   return (
                     <div key={label} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                       <div className="min-w-0">
-                        <p className="text-xs font-medium text-slate-700">{label}</p>
-                        <p className="text-xs text-slate-400 truncate">{state.name || "No file"}</p>
+                        <p className="text-sm font-medium text-slate-700">{label}</p>
+                        <p className="text-sm text-slate-400 truncate">{state.name || "No file"}</p>
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <label htmlFor={inputId} className="cursor-pointer inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
+                        <label htmlFor={inputId} className="cursor-pointer inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
                           <Upload className="h-3 w-3" /> {state.name ? "Replace" : "Upload"}
                         </label>
                         {state.name && (
@@ -503,10 +503,10 @@ export default function LandlordProperties() {
             </div>
 
             <div className="flex items-center gap-3 pt-1">
-              <button type="submit" className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95">
+              <button type="submit" className="rounded-lg bg-[#1e1e2e] px-5 py-2.5 text-base font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95">
                 {editingId !== null ? "Save Changes" : "Save Property"}
               </button>
-              <button type="button" onClick={() => { resetForm(); setEditingId(null); setShowForm(false); }} className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition active:scale-95">
+              <button type="button" onClick={() => { resetForm(); setEditingId(null); setShowForm(false); }} className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-base font-semibold text-slate-700 hover:bg-slate-50 transition active:scale-95">
                 Cancel
               </button>
             </div>
@@ -519,11 +519,11 @@ export default function LandlordProperties() {
         {properties.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center">
             <Home className="mx-auto h-12 w-12 text-slate-300" />
-            <h3 className="mt-4 text-sm font-semibold text-slate-900">No properties yet</h3>
-            <p className="mt-1 text-sm text-slate-500">Get started by adding your first property.</p>
+            <h3 className="mt-4 text-base font-semibold text-slate-900">No properties yet</h3>
+            <p className="mt-1 text-base text-slate-500">Get started by adding your first property.</p>
             <button
               onClick={() => { resetForm(); setEditingId(null); setShowForm(true); }}
-              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#1e1e2e] px-4 py-2 text-base font-semibold text-[#818cf8] transition hover:bg-[#252535]"
             >
               <Plus className="h-4 w-4" /> Add Property
             </button>
@@ -538,15 +538,15 @@ export default function LandlordProperties() {
                   </div>
                   <div>
                     <p className="font-semibold text-slate-900">{p.name}</p>
-                    <p className="text-sm text-slate-500">{p.address}</p>
+                    <p className="text-base text-slate-500">{p.address}</p>
                     <div className="mt-2 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-600">
+                      <span className="rounded-full bg-[#0d1829] px-2.5 py-0.5 text-sm font-medium text-[#5e6ad2]">
                         {p.tenants.length} tenant{p.tenants.length !== 1 ? 's' : ''}
                       </span>
-                      <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                      <span className="rounded-full bg-[#2a1e00] px-2.5 py-0.5 text-sm font-medium text-[#ff9f0a]">
                         {p._count.maintenanceRequests} request{p._count.maintenanceRequests !== 1 ? 's' : ''}
                       </span>
-                      <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                      <span className="rounded-full bg-[#0d2818] px-2.5 py-0.5 text-sm font-medium text-[#30d158]">
                         {p._count.rentPayments} payment{p._count.rentPayments !== 1 ? 's' : ''}
                       </span>
                     </div>

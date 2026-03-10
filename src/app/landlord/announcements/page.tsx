@@ -23,7 +23,7 @@ type Property = { id: string; name: string };
 
 const priorityConfig: Record<Priority, { badge: string; dot: string; label: string }> = {
   INFO:    { badge: "bg-blue-100 text-blue-700",   dot: "bg-blue-500",   label: "Info"    },
-  WARNING: { badge: "bg-amber-100 text-amber-700", dot: "bg-amber-500",  label: "Warning" },
+  WARNING: { badge: "bg-[#2a1e00] text-[#ff9f0a]", dot: "bg-[#ff9f0a]",  label: "Warning" },
   URGENT:  { badge: "bg-red-100 text-red-700",     dot: "bg-red-500",    label: "Urgent"  },
 };
 
@@ -36,7 +36,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl bg-slate-900 px-5 py-3 text-white shadow-xl">
       <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0" />
-      <span className="text-sm font-medium">{message}</span>
+      <span className="text-base font-medium">{message}</span>
       <button onClick={onClose} className="ml-2 text-slate-400 hover:text-white transition">
         <X className="h-4 w-4" />
       </button>
@@ -44,9 +44,9 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   );
 }
 
-const inputClass  = "mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
-const selectClass = "mt-1.5 w-full appearance-none rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
-const labelClass  = "block text-xs font-medium uppercase tracking-wide text-slate-400";
+const inputClass  = "mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+const selectClass = "mt-1.5 w-full appearance-none rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+const labelClass  = "block text-sm font-medium uppercase tracking-wide text-slate-400";
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
@@ -130,31 +130,31 @@ export default function LandlordAnnouncements() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+        <Loader2 className="h-6 w-6 animate-spin text-[#5e6ad2]" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="px-8 py-8 max-w-3xl mx-auto">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+      <div className="px-8 pb-8 max-w-3xl mx-auto">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-base text-red-700">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="px-8 py-8 max-w-3xl mx-auto">
+    <div className="px-8 pb-8 max-w-3xl mx-auto">
 
       {/* Header */}
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Announcements</h1>
-          <p className="mt-1 text-sm text-slate-500">Post updates and notices for your tenants.</p>
+          <h1 className="text-3xl font-bold text-slate-900">Announcements</h1>
+          <p className="mt-1 text-base text-slate-500">Post updates and notices for your tenants.</p>
         </div>
         <button
           onClick={() => setShowForm((v) => !v)}
-          className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#1e1e2e] px-4 py-2.5 text-base font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95"
         >
           <Plus className="h-4 w-4" /> New Announcement
         </button>
@@ -163,7 +163,7 @@ export default function LandlordAnnouncements() {
       {/* Create form */}
       {showForm && (
         <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-5 text-base font-semibold text-slate-900">Create Announcement</h2>
+          <h2 className="mb-5 text-lg font-semibold text-slate-900">Create Announcement</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
 
             <div>
@@ -186,7 +186,7 @@ export default function LandlordAnnouncements() {
                 required
                 rows={4}
                 placeholder="Write the full announcement for tenants…"
-                className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
+                className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
               />
             </div>
 
@@ -215,7 +215,7 @@ export default function LandlordAnnouncements() {
                     key={p}
                     type="button"
                     onClick={() => setPriority(p)}
-                    className={`flex-1 rounded-lg border py-2 text-xs font-semibold transition ${
+                    className={`flex-1 rounded-lg border py-2 text-sm font-semibold transition ${
                       priority === p
                         ? `${priorityConfig[p].badge} border-transparent`
                         : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
@@ -231,14 +231,14 @@ export default function LandlordAnnouncements() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95 disabled:opacity-50"
+                className="rounded-lg bg-[#1e1e2e] px-5 py-2.5 text-base font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95 disabled:opacity-50"
               >
                 {submitting ? "Publishing…" : "Publish"}
               </button>
               <button
                 type="button"
                 onClick={() => { resetForm(); setShowForm(false); }}
-                className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition active:scale-95"
+                className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-base font-semibold text-slate-700 hover:bg-slate-50 transition active:scale-95"
               >
                 Cancel
               </button>
@@ -252,8 +252,8 @@ export default function LandlordAnnouncements() {
       {announcements.length === 0 && (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
           <Bell className="mx-auto h-8 w-8 text-slate-300" />
-          <p className="mt-3 text-sm font-medium text-slate-500">No announcements yet</p>
-          <p className="mt-1 text-xs text-slate-400">Click &ldquo;New Announcement&rdquo; to post your first notice.</p>
+          <p className="mt-3 text-base font-medium text-slate-500">No announcements yet</p>
+          <p className="mt-1 text-sm text-slate-400">Click &ldquo;New Announcement&rdquo; to post your first notice.</p>
         </div>
       )}
 
@@ -269,13 +269,13 @@ export default function LandlordAnnouncements() {
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-semibold text-slate-900">{a.title}</p>
-                      <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${cfg.badge}`}>
+                      <span className={`inline-flex rounded-full px-2.5 py-0.5 text-sm font-semibold ${cfg.badge}`}>
                         {cfg.label}
                       </span>
                     </div>
-                    <p className="mt-0.5 text-xs text-slate-500">{a.property?.name ?? "All Properties"}</p>
-                    <p className="mt-2 text-sm text-slate-600 leading-relaxed">{a.message}</p>
-                    <p className="mt-2 text-xs text-slate-400">{fmt(a.createdAt)}</p>
+                    <p className="mt-0.5 text-sm text-slate-500">{a.property?.name ?? "All Properties"}</p>
+                    <p className="mt-2 text-base text-slate-600 leading-relaxed">{a.message}</p>
+                    <p className="mt-2 text-sm text-slate-400">{fmt(a.createdAt)}</p>
                   </div>
                 </div>
                 <button

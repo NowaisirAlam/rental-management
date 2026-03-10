@@ -18,12 +18,12 @@ type ApiPayment = {
 };
 
 const statusConfig: Record<DisplayStatus, string> = {
-  Paid:    "bg-green-100 text-green-700",
-  Pending: "bg-amber-100 text-amber-700",
-  Overdue: "bg-red-100 text-red-700",
+  Paid:    "bg-[#0d2818] text-[#30d158]",
+  Pending: "bg-[#2a1e00] text-[#ff9f0a]",
+  Overdue: "bg-[#2a0d0d] text-[#ff453a]",
 };
 
-const selectClass = "appearance-none rounded-lg border border-slate-300 bg-white pl-3 pr-8 py-2 text-sm text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+const selectClass = "appearance-none rounded-lg border border-slate-300 bg-white pl-3 pr-8 py-2 text-base text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
 
 export default function LandlordPayments() {
   const [payments, setPayments] = useState<ApiPayment[]>([]);
@@ -100,7 +100,7 @@ export default function LandlordPayments() {
 
   if (loading) {
     return (
-      <div className="px-8 py-8 max-w-5xl mx-auto">
+      <div className="px-8 pb-8 max-w-5xl mx-auto">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-slate-900">Payments</h1>
           <p className="mt-1 text-sm text-slate-500">Track rent collection across all your properties.</p>
@@ -114,7 +114,7 @@ export default function LandlordPayments() {
 
   if (error) {
     return (
-      <div className="px-8 py-8 max-w-5xl mx-auto">
+      <div className="px-8 pb-8 max-w-5xl mx-auto">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-slate-900">Payments</h1>
           <p className="mt-1 text-sm text-slate-500">Track rent collection across all your properties.</p>
@@ -133,58 +133,59 @@ export default function LandlordPayments() {
   }
 
   return (
-    <div className="px-8 py-8 max-w-5xl mx-auto">
+    <div className="px-8 pb-8 max-w-5xl mx-auto">
 
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Payments</h1>
-        <p className="mt-1 text-sm text-slate-500">Track rent collection across all your properties.</p>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-slate-900">Payments</h1>
+        <p className="mt-1 text-base text-slate-500">Track rent collection across all your properties.</p>
       </div>
 
-      {/* Summary chips */}
-      <div className="mb-6 flex flex-wrap gap-3">
+      {/* Summary chips + Filters on same row */}
+      <div className="mb-4 flex items-center gap-3">
+        {/* Summary chips — left side */}
         {[
-          { label: "Total",   val: `$${total.toLocaleString()}`, color: "bg-blue-50  text-blue-700"  },
-          { label: "Paid",    val: String(paid),                  color: "bg-green-50 text-green-700" },
-          { label: "Pending", val: String(pending),               color: "bg-amber-50 text-amber-700" },
-          { label: "Overdue", val: String(overdue),               color: "bg-red-50   text-red-700"   },
+          { label: "Total",   val: `$${total.toLocaleString()}`, color: "bg-[#0d1829] text-[#5e6ad2]" },
+          { label: "Paid",    val: String(paid),                  color: "bg-[#0d2818] text-[#30d158]" },
+          { label: "Pending", val: String(pending),               color: "bg-[#2a1e00] text-[#ff9f0a]" },
+          { label: "Overdue", val: String(overdue),               color: "bg-[#2a0d0d] text-[#ff453a]" },
         ].map((c) => (
-          <div key={c.label} className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold ${c.color}`}>
+          <div key={c.label} className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${c.color}`}>
             {c.label}: {c.val}
           </div>
         ))}
-      </div>
 
-      {/* Filters */}
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="relative">
-          <select value={filterProperty} onChange={(e) => setFilterProperty(e.target.value)} className={selectClass}>
-            {properties.map((p) => <option key={p}>{p}</option>)}
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-        </div>
-        <div className="relative">
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className={selectClass}>
-            {statuses.map((s) => <option key={s}>{s}</option>)}
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-        </div>
-        <div className="relative">
-          <select value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)} className={selectClass}>
-            {months.map((m) => <option key={m}>{m}</option>)}
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        {/* Filters — right-aligned */}
+        <div className="ml-auto flex items-center gap-2">
+          <div className="relative">
+            <select value={filterProperty} onChange={(e) => setFilterProperty(e.target.value)} className={selectClass}>
+              {properties.map((p) => <option key={p}>{p}</option>)}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          </div>
+          <div className="relative">
+            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className={selectClass}>
+              {statuses.map((s) => <option key={s}>{s}</option>)}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          </div>
+          <div className="relative">
+            <select value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)} className={selectClass}>
+              {months.map((m) => <option key={m}>{m}</option>)}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          </div>
         </div>
       </div>
 
       {/* Table */}
       <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
                 {["Tenant", "Property", "Amount", "Due Date", "Status", "Actions"].map((h) => (
-                  <th key={h} className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <th key={h} className="px-5 py-3 text-left text-sm font-semibold uppercase tracking-wide text-slate-400">
                     {h}
                   </th>
                 ))}
@@ -204,7 +205,7 @@ export default function LandlordPayments() {
                     <td className="px-5 py-3.5 font-semibold text-slate-900">${row.amount.toLocaleString()}</td>
                     <td className="px-5 py-3.5 text-slate-500">{formatDate(row.dueDate)}</td>
                     <td className="px-5 py-3.5">
-                      <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusConfig[displayStatus]}`}>
+                      <span className={`inline-flex rounded-full px-2.5 py-0.5 text-sm font-semibold ${statusConfig[displayStatus]}`}>
                         {displayStatus}
                       </span>
                     </td>
@@ -213,7 +214,7 @@ export default function LandlordPayments() {
                         <button
                           onClick={() => markAsPaid(row.id)}
                           disabled={isMarking}
-                          className="px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-3 py-1.5 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {isMarking ? "Marking..." : "Mark Paid"}
                         </button>
@@ -224,7 +225,7 @@ export default function LandlordPayments() {
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-10 text-center text-sm text-slate-400">
+                  <td colSpan={6} className="px-5 py-10 text-center text-base text-slate-400">
                     No payments match the current filters.
                   </td>
                 </tr>

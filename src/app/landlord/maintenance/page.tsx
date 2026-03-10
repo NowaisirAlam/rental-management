@@ -49,7 +49,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl bg-slate-900 px-5 py-3 text-white shadow-xl">
       <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0" />
-      <span className="text-sm font-medium">{message}</span>
+      <span className="text-base font-medium">{message}</span>
       <button onClick={onClose} className="ml-2 text-slate-400 hover:text-white transition">
         <X className="h-4 w-4" />
       </button>
@@ -77,9 +77,9 @@ function NotesModal({
       <div className="relative z-50 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">Ticket Details</p>
-            <h2 className="mt-1 text-base font-bold text-slate-900">{ticket.title}</h2>
-            <p className="text-xs text-slate-500">{ticket.tenant} · {ticket.property}</p>
+            <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">Ticket Details</p>
+            <h2 className="mt-1 text-lg font-bold text-slate-900">{ticket.title}</h2>
+            <p className="text-sm text-slate-500">{ticket.tenant} · {ticket.property}</p>
           </div>
           <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition">
             <X className="h-4 w-4" />
@@ -87,31 +87,31 @@ function NotesModal({
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-medium uppercase tracking-wide text-slate-400">Assign Contractor</label>
+            <label className="block text-sm font-medium uppercase tracking-wide text-slate-400">Assign Contractor</label>
             <input
               type="text"
               value={contractor}
               onChange={(e) => setContractor(e.target.value)}
               placeholder="e.g. Mike's Handyman"
-              className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition"
+              className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium uppercase tracking-wide text-slate-400">Internal Notes</label>
+            <label className="block text-sm font-medium uppercase tracking-wide text-slate-400">Internal Notes</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={4}
               placeholder="Add notes for your records…"
-              className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition resize-none"
+              className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition resize-none"
             />
           </div>
         </div>
         <div className="mt-5 flex items-center justify-end gap-3">
-          <button onClick={onClose} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition active:scale-95">
+          <button onClick={onClose} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-700 hover:bg-slate-50 transition active:scale-95">
             Cancel
           </button>
-          <button onClick={() => { onSave(notes, contractor); onClose(); }} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition active:scale-95">
+          <button onClick={() => { onSave(notes, contractor); onClose(); }} className="rounded-lg bg-blue-600 px-4 py-2 text-base font-semibold text-white shadow-sm hover:bg-blue-700 transition active:scale-95">
             Save
           </button>
         </div>
@@ -189,13 +189,13 @@ export default function LandlordMaintenance() {
     ? tickets
     : tickets.filter((t) => t.status === filterStatus);
 
-  const selectBase = "appearance-none rounded-lg border border-slate-300 bg-white pl-3 pr-8 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition";
+  const selectBase = "appearance-none rounded-lg border border-slate-300 bg-white pl-3 pr-8 py-2 text-base text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition";
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full py-32">
         <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-        <span className="ml-2 text-sm text-slate-500">Loading tickets...</span>
+        <span className="ml-2 text-base text-slate-500">Loading tickets...</span>
       </div>
     );
   }
@@ -203,20 +203,20 @@ export default function LandlordMaintenance() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-full py-32">
-        <p className="text-sm text-red-600 mb-3">{error}</p>
-        <button onClick={() => window.location.reload()} className="text-sm text-blue-600 hover:underline">Retry</button>
+        <p className="text-base text-red-600 mb-3">{error}</p>
+        <button onClick={() => window.location.reload()} className="text-base text-blue-600 hover:underline">Retry</button>
       </div>
     );
   }
 
   return (
-    <div className="px-8 py-8 max-w-4xl mx-auto">
+    <div className="px-8 pb-8 max-w-4xl mx-auto">
 
       {/* Header */}
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Maintenance Tickets</h1>
-          <p className="mt-1 text-sm text-slate-500">Review and manage tenant-submitted maintenance requests.</p>
+          <h1 className="text-3xl font-bold text-slate-900">Maintenance Tickets</h1>
+          <p className="mt-1 text-base text-slate-500">Review and manage tenant-submitted maintenance requests.</p>
         </div>
         <div className="relative">
           <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className={selectBase}>
@@ -230,7 +230,7 @@ export default function LandlordMaintenance() {
 
       {/* Empty state */}
       {filtered.length === 0 && (
-        <p className="text-sm text-slate-400 text-center py-16">No maintenance tickets found.</p>
+        <p className="text-base text-slate-400 text-center py-16">No maintenance tickets found.</p>
       )}
 
       {/* Ticket cards */}
@@ -244,34 +244,34 @@ export default function LandlordMaintenance() {
                 {/* Left */}
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-semibold text-slate-900">{t.title}</p>
-                    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${cfg.badge}`}>{t.status}</span>
+                    <p className="text-base font-semibold text-slate-900">{t.title}</p>
+                    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-sm font-semibold ${cfg.badge}`}>{t.status}</span>
                     {t.urgent && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-sm font-semibold text-red-700">
                         <AlertTriangle className="h-3 w-3" /> Urgent
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 text-xs text-slate-500">{t.tenant} · {t.property}</p>
-                  <p className="mt-1.5 text-xs text-slate-500 leading-relaxed">{t.description}</p>
+                  <p className="mt-1 text-sm text-slate-500">{t.tenant} · {t.property}</p>
+                  <p className="mt-1.5 text-sm text-slate-500 leading-relaxed">{t.description}</p>
                   {t.contractor && (
-                    <p className="mt-1 text-xs text-blue-600 font-medium">Assigned: {t.contractor}</p>
+                    <p className="mt-1 text-sm text-blue-600 font-medium">Assigned: {t.contractor}</p>
                   )}
                   {t.notes && (
-                    <p className="mt-1 text-xs text-slate-400 italic">{t.notes}</p>
+                    <p className="mt-1 text-sm text-slate-400 italic">{t.notes}</p>
                   )}
                 </div>
 
                 {/* Right */}
                 <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                  <p className="text-xs text-slate-400">{t.date}</p>
+                  <p className="text-sm text-slate-400">{t.date}</p>
 
                   {/* Status dropdown */}
                   <div className="relative">
                     <select
                       value={t.status}
                       onChange={(e) => updateStatus(t.id, e.target.value as TicketStatus)}
-                      className="appearance-none rounded-lg border border-slate-200 bg-slate-50 pl-3 pr-7 py-1.5 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:outline-none transition"
+                      className="appearance-none rounded-lg border border-slate-200 bg-slate-50 pl-3 pr-7 py-1.5 text-sm font-semibold text-slate-700 focus:border-blue-500 focus:outline-none transition"
                     >
                       <option>Submitted</option>
                       <option>In Progress</option>
@@ -284,13 +284,13 @@ export default function LandlordMaintenance() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setNotesTicket(t)}
-                      className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+                      className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"
                     >
                       Notes
                     </button>
                     <button
                       onClick={() => toggleUrgent(t.id)}
-                      className={`rounded-lg border px-2.5 py-1 text-xs font-semibold transition ${
+                      className={`rounded-lg border px-2.5 py-1 text-sm font-semibold transition ${
                         t.urgent
                           ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
                           : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
