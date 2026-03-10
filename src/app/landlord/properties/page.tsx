@@ -129,7 +129,7 @@ function ViewPropertyModal({ property, onClose, onEdit }: { property: Property; 
           <button onClick={onClose} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95">
             Close
           </button>
-          <button onClick={() => { onClose(); onEdit(); }} className="rounded-lg bg-[#5e6ad2] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95">
+          <button onClick={() => { onClose(); onEdit(); }} className="rounded-lg bg-[#1e1e2e] px-4 py-2 text-sm font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95">
             Edit Property
           </button>
         </div>
@@ -366,7 +366,7 @@ export default function LandlordProperties() {
           <p className="mt-1 text-sm text-slate-500">{error}</p>
           <button
             onClick={fetchProperties}
-            className="mt-4 rounded-lg bg-[#5e6ad2] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8]"
+            className="mt-4 rounded-lg bg-[#1e1e2e] px-4 py-2 text-sm font-semibold text-[#818cf8] transition hover:bg-[#252535]"
           >
             Try Again
           </button>
@@ -386,7 +386,7 @@ export default function LandlordProperties() {
         </div>
         <button
           onClick={() => { resetForm(); setEditingId(null); setShowForm((v) => !v); }}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#5e6ad2] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#1e1e2e] px-4 py-2.5 text-sm font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95"
         >
           <Plus className="h-4 w-4" /> Add Property
         </button>
@@ -503,7 +503,7 @@ export default function LandlordProperties() {
             </div>
 
             <div className="flex items-center gap-3 pt-1">
-              <button type="submit" className="rounded-lg bg-[#5e6ad2] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8] active:scale-95">
+              <button type="submit" className="rounded-lg bg-[#1e1e2e] px-5 py-2.5 text-sm font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95">
                 {editingId !== null ? "Save Changes" : "Save Property"}
               </button>
               <button type="button" onClick={() => { resetForm(); setEditingId(null); setShowForm(false); }} className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition active:scale-95">
@@ -523,7 +523,7 @@ export default function LandlordProperties() {
             <p className="mt-1 text-sm text-slate-500">Get started by adding your first property.</p>
             <button
               onClick={() => { resetForm(); setEditingId(null); setShowForm(true); }}
-              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#5e6ad2] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4a54b8]"
+              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#1e1e2e] px-4 py-2 text-sm font-semibold text-[#818cf8] transition hover:bg-[#252535]"
             >
               <Plus className="h-4 w-4" /> Add Property
             </button>
