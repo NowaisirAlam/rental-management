@@ -91,10 +91,10 @@ function parseApiLease(raw: Record<string, unknown>): Lease {
 
 // ── Shared styles ─────────────────────────────────────────────────────────────
 
-const inputClass  = "mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
-const selectClass = "mt-1.5 w-full appearance-none rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
-const labelClass  = "block text-xs font-medium uppercase tracking-wide text-slate-400";
-const inlineInput = "w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+const inputClass  = "mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+const selectClass = "mt-1.5 w-full appearance-none rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+const labelClass  = "block text-sm font-medium uppercase tracking-wide text-slate-400";
+const inlineInput = "w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-base text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
 
 // ── Section title ─────────────────────────────────────────────────────────────
 
@@ -102,7 +102,7 @@ function SectionTitle({ title }: { title: string }) {
   return (
     <div className="mt-8 flex items-center gap-3">
       <div className="flex-1 border-t border-slate-200" />
-      <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">{title}</span>
+      <span className="text-sm font-semibold uppercase tracking-wider text-slate-400">{title}</span>
       <div className="flex-1 border-t border-slate-200" />
     </div>
   );
@@ -133,7 +133,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl bg-slate-900 px-5 py-3 text-white shadow-xl">
       <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0" />
-      <span className="text-sm font-medium">{message}</span>
+      <span className="text-base font-medium">{message}</span>
       <button onClick={onClose} className="ml-2 text-slate-400 hover:text-white transition"><X className="h-4 w-4" /></button>
     </div>
   );
@@ -159,7 +159,7 @@ function ActionsMenu({ onView, onEdit, onDelete }: { onView: () => void; onEdit:
     return () => document.removeEventListener("keydown", handler);
   }, [open]);
 
-  const item = "flex w-full items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors rounded-lg";
+  const item = "flex w-full items-center gap-2.5 px-4 py-2 text-base text-slate-700 hover:bg-slate-50 transition-colors rounded-lg";
 
   return (
     <div ref={ref} className="relative flex-shrink-0">
@@ -180,7 +180,7 @@ function ActionsMenu({ onView, onEdit, onDelete }: { onView: () => void; onEdit:
           </button>
           <div className="my-1 border-t border-slate-100" />
           <button
-            className="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors rounded-lg"
+            className="flex w-full items-center gap-2.5 px-4 py-2 text-base text-red-600 hover:bg-red-50 transition-colors rounded-lg"
             onClick={() => { setOpen(false); onDelete(); }}
           >
             <Trash2 className="h-4 w-4" /> Delete Lease
@@ -202,8 +202,8 @@ function ViewLeaseModal({ lease, onClose, onEdit }: { lease: Lease; onClose: () 
 
   const row = (label: string, value: string) => value ? (
     <div className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0">
-      <span className="w-32 flex-shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</span>
-      <span className="flex-1 text-sm text-slate-800">{value}</span>
+      <span className="w-32 flex-shrink-0 text-sm font-semibold uppercase tracking-wide text-slate-400">{label}</span>
+      <span className="flex-1 text-base text-slate-800">{value}</span>
     </div>
   ) : null;
 
@@ -215,8 +215,8 @@ function ViewLeaseModal({ lease, onClose, onEdit }: { lease: Lease; onClose: () 
       <div className="relative z-50 w-full max-w-lg rounded-2xl bg-white shadow-2xl flex flex-col max-h-[90vh]">
         <div className="flex items-start justify-between gap-4 p-6 pb-4 flex-shrink-0">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">Lease Agreement</p>
-            <h2 className="mt-1 text-lg font-bold text-slate-900 leading-snug">{lease.tenantName}</h2>
+            <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">Lease Agreement</p>
+            <h2 className="mt-1 text-xl font-bold text-slate-900 leading-snug">{lease.tenantName}</h2>
           </div>
           <button onClick={onClose} className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700">
             <X className="h-4 w-4" />
@@ -238,10 +238,10 @@ function ViewLeaseModal({ lease, onClose, onEdit }: { lease: Lease; onClose: () 
           ) : null}
         </div>
         <div className="flex items-center justify-end gap-3 border-t border-slate-100 px-6 py-4 flex-shrink-0">
-          <button onClick={onClose} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95">
+          <button onClick={onClose} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95">
             Close
           </button>
-          <button onClick={() => { onClose(); onEdit(); }} className="rounded-lg bg-[#1e1e2e] px-4 py-2 text-sm font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95">
+          <button onClick={() => { onClose(); onEdit(); }} className="rounded-lg bg-[#1e1e2e] px-4 py-2 text-base font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95">
             Edit Lease
           </button>
         </div>
@@ -268,15 +268,15 @@ function ConfirmDeleteModal({ title, onCancel, onConfirm }: { title: string; onC
             <AlertTriangle className="h-5 w-5 text-red-600" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900">{title}</h3>
-            <p className="mt-1.5 text-sm text-slate-500 leading-relaxed">This action cannot be undone.</p>
+            <h3 className="text-lg font-bold text-slate-900">{title}</h3>
+            <p className="mt-1.5 text-base text-slate-500 leading-relaxed">This action cannot be undone.</p>
           </div>
         </div>
         <div className="mt-6 flex items-center justify-end gap-3">
-          <button onClick={onCancel} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95">
+          <button onClick={onCancel} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95">
             Cancel
           </button>
-          <button onClick={onConfirm} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 active:scale-95">
+          <button onClick={onConfirm} className="rounded-lg bg-red-600 px-4 py-2 text-base font-semibold text-white shadow-sm transition hover:bg-red-700 active:scale-95">
             Delete
           </button>
         </div>
@@ -473,7 +473,7 @@ export default function LandlordLeases() {
   if (error) {
     return (
       <div className="px-8 pb-8 max-w-4xl mx-auto">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-base text-red-700">{error}</div>
       </div>
     );
   }
@@ -484,12 +484,12 @@ export default function LandlordLeases() {
       {/* Header */}
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Leases &amp; Tenant Assignment</h1>
-          <p className="mt-1 text-sm text-slate-500">Assign tenants to units and manage lease agreements.</p>
+          <h1 className="text-3xl font-bold text-slate-900">Leases &amp; Tenant Assignment</h1>
+          <p className="mt-1 text-base text-slate-500">Assign tenants to units and manage lease agreements.</p>
         </div>
         <button
           onClick={() => { resetForm(); setEditingId(null); setShowForm((v) => !v); }}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#1e1e2e] px-4 py-2.5 text-sm font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#1e1e2e] px-4 py-2.5 text-base font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95"
         >
           <Plus className="h-4 w-4" /> Add Lease
         </button>
@@ -499,7 +499,7 @@ export default function LandlordLeases() {
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-8">
           <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-            <h2 className="text-base font-semibold text-slate-900 mb-1">
+            <h2 className="text-lg font-semibold text-slate-900 mb-1">
               {editingId !== null ? "Edit Lease" : "New Lease"}
             </h2>
 
@@ -580,8 +580,8 @@ export default function LandlordLeases() {
                       : "bg-slate-50 ring-1 ring-slate-200 hover:bg-slate-100"
                   }`}
                 >
-                  <span className="text-sm font-medium text-slate-700">{u.name}</span>
-                  <span className={`text-xs font-semibold ${u.included ? "text-green-600" : "text-slate-400"}`}>
+                  <span className="text-base font-medium text-slate-700">{u.name}</span>
+                  <span className={`text-sm font-semibold ${u.included ? "text-green-600" : "text-slate-400"}`}>
                     {u.included ? "Included" : "Not included"}
                   </span>
                 </button>
@@ -593,7 +593,7 @@ export default function LandlordLeases() {
             <div className="mt-5 space-y-3">
               {formOccupants.map((o, idx) => (
                 <div key={idx} className="flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-3">
-                  <div className="h-8 w-8 flex-shrink-0 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
+                  <div className="h-8 w-8 flex-shrink-0 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-600">
                     {o.name.split(" ").map((n) => n[0]).join("").toUpperCase() || "?"}
                   </div>
                   <div className="flex-1 grid gap-3 sm:grid-cols-2">
@@ -631,12 +631,12 @@ export default function LandlordLeases() {
           {/* Form actions */}
           <div className="mt-5 flex items-center gap-3">
             <button type="submit" disabled={saving}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#1e1e2e] px-6 py-2.5 text-sm font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95 disabled:opacity-60">
+              className="inline-flex items-center gap-2 rounded-lg bg-[#1e1e2e] px-6 py-2.5 text-base font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95 disabled:opacity-60">
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               {editingId !== null ? "Save Changes" : "Create Lease"}
             </button>
             <button type="button" onClick={() => { resetForm(); setEditingId(null); setShowForm(false); }}
-              className="rounded-lg border border-slate-300 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95">
+              className="rounded-lg border border-slate-300 bg-white px-6 py-2.5 text-base font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95">
               Cancel
             </button>
           </div>
@@ -647,8 +647,8 @@ export default function LandlordLeases() {
       {leases.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
           <FileText className="mx-auto h-8 w-8 text-slate-300" />
-          <p className="mt-3 text-sm font-medium text-slate-500">No leases yet</p>
-          <p className="mt-1 text-xs text-slate-400">Click &ldquo;Add Lease&rdquo; to create your first lease agreement.</p>
+          <p className="mt-3 text-base font-medium text-slate-500">No leases yet</p>
+          <p className="mt-1 text-sm text-slate-400">Click &ldquo;Add Lease&rdquo; to create your first lease agreement.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -667,21 +667,21 @@ export default function LandlordLeases() {
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-semibold text-slate-900">{l.tenantName}</p>
                         {expiringSoon && !expired && (
-                          <span className="rounded-full bg-[#2a1e00] px-2.5 py-0.5 text-xs font-semibold text-[#ff9f0a]">Expires in {days}d</span>
+                          <span className="rounded-full bg-[#2a1e00] px-2.5 py-0.5 text-sm font-semibold text-[#ff9f0a]">Expires in {days}d</span>
                         )}
                         {expired && (
-                          <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">Expired</span>
+                          <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-sm font-semibold text-red-700">Expired</span>
                         )}
                         {!expiringSoon && !expired && (
-                          <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">{l.status}</span>
+                          <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-sm font-semibold text-green-700">{l.status}</span>
                         )}
                       </div>
-                      <p className="mt-0.5 text-sm text-slate-500">{l.propertyName}</p>
-                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                      <p className="mt-0.5 text-base text-slate-500">{l.propertyName}</p>
+                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-500">
                         <span>{l.tenantEmail}</span>
                         {l.tenantPhone && <span>{l.tenantPhone}</span>}
                       </div>
-                      <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-500">
+                      <div className="mt-2 flex flex-wrap gap-3 text-sm text-slate-500">
                         <span><span className="font-medium text-slate-700">Lease:</span> {fmt(l.startDate)} – {fmt(l.endDate)}</span>
                         <span><span className="font-medium text-slate-700">Rent:</span> ${l.rentAmount.toLocaleString()}/mo</span>
                         {l.depositAmount > 0 && <span><span className="font-medium text-slate-700">Deposit:</span> ${l.depositAmount.toLocaleString()}</span>}
