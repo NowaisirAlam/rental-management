@@ -43,15 +43,15 @@ html {
    inside the tenant shell — no changes needed on individual pages.
    ────────────────────────────────────────────────────────────────────────── */
 [data-theme="dark"] {
-  --color-white:     #1c1c1e;  /* card bg */
-  --color-slate-50:  #0f0f10;  /* page bg */
-  --color-slate-100: #1c1c1e;  /* hover bg */
-  --color-slate-200: #2a2a2c;  /* borders */
-  --color-slate-300: #3a3a3c;  /* subtle dividers */
-  --color-slate-400: #5a5a5e;  /* muted text */
-  --color-slate-500: #8a8a8e;  /* secondary text */
-  --color-slate-600: #aeaeb2;  /* body text */
-  --color-slate-700: #d1d1d6;  /* label text */
-  --color-slate-800: #e5e5ea;  /* secondary heading */
-  --color-slate-900: #f2f2f7;  /* primary text */
+  --color-white:     #1e293b; /* card backgrounds  */
+  --color-slate-50:  #0f172a; /* page background   */
+  --color-slate-100: #1e293b; /* hover bg          */
+  --color-slate-200: #334155; /* borders           */
+  --color-slate-300: #475569; /* subtle dividers   */
+  --color-slate-400: #64748b; /* muted text        */
+  --color-slate-500: #94a3b8; /* secondary text    */
+  --color-slate-600: #cbd5e1; /* body text         */
+  --color-slate-700: #e2e8f0; /* label text        */
+  --color-slate-800: #f1f5f9; /* secondary heading */
+  --color-slate-900: #f8fafc; /* primary text      */
 }
