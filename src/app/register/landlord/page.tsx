@@ -212,7 +212,7 @@ export default function LandlordRegisterPage() {
           align-items: center;
           gap: 10px;
           font-family: var(--font-playfair), Georgia, serif;
-          font-size: 1.35rem;
+          font-size: 1.8rem;
           color: rgba(255,255,255,0.85);
           text-decoration: none;
         }
