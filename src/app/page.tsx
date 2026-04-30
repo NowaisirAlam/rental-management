@@ -1289,7 +1289,7 @@ function PriceCard({
           </li>
         ))}
       </ul>
-      <Link href="/login" className={outline ? "btn-warm-outline" : "btn-warm"}>
+      <Link href="/register" className={outline ? "btn-warm-outline" : "btn-warm"}>
         {button}
       </Link>
     </div>
