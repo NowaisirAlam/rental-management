@@ -74,12 +74,17 @@ export default function LoginPage() {
           align-items: center;
           gap: 10px;
           font-family: var(--font-playfair), Georgia, serif;
-          font-size: 1.15rem;
+          font-size: 1.8rem;
           color: rgba(255,255,255,0.9);
           text-decoration: none;
           line-height: 1;
         }
-        .lp-logo svg { flex-shrink: 0; display: block; }
+        .lp-logo svg {
+          width: 30px;
+          height: 30px;
+          flex-shrink: 0;
+          display: block;
+        }
         .lp-visual-content {
           position: relative;
           z-index: 2;
@@ -361,7 +366,7 @@ export default function LoginPage() {
           <div className="lp-visual-overlay" />
 
           <Link href="/" className="lp-logo">
-            <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+            <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
               <rect width="32" height="32" rx="8" fill="#C4956A"/>
               <path d="M8 24V10a2 2 0 012-2h12a2 2 0 012 2v14" stroke="#1A1714" strokeWidth="2" strokeLinecap="round"/>
               <path d="M12 24V16h8v8" stroke="#1A1714" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
