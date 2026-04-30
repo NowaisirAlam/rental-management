@@ -63,12 +63,17 @@ export default function RegisterRolePage() {
           align-items: center;
           gap: 10px;
           font-family: var(--font-playfair), Georgia, serif;
-          font-size: 1.15rem;
+          font-size: 1.8rem;
           color: rgba(255,255,255,0.9);
           text-decoration: none;
           line-height: 1;
         }
-        .rp-logo svg { flex-shrink: 0; display: block; }
+        .rp-logo svg {
+          width: 30px;
+          height: 30px;
+          flex-shrink: 0;
+          display: block;
+        }
         .rp-visual-content { position: relative; z-index: 2; }
         .rp-tagline {
           font-family: var(--font-playfair), Georgia, serif;
