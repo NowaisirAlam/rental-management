@@ -145,7 +145,7 @@ export default function TenantRegisterPage() {
           z-index: 100;
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          justify-content: flex-start;
           padding: 0 56px;
           height: 72px;
           background: rgba(26,23,20,0.92);
@@ -164,17 +164,20 @@ export default function TenantRegisterPage() {
         }
 
         .tr-navbar-brand svg {
-          width: 30px;
-          height: 30px;
+          width: 26px;
+          height: 26px;
         }
 
         .tr-navbar-links {
           display: flex;
           gap: 36px;
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
         }
 
         .tr-navbar-links a {
-          font-size: 0.85rem;
+          font-size: 1.19rem;
           font-weight: 400;
           color: rgba(255,255,255,0.5);
           letter-spacing: 0.02em;
@@ -186,42 +189,6 @@ export default function TenantRegisterPage() {
           color: rgba(255,255,255,0.85);
         }
 
-        .tr-navbar-actions {
-          display: flex;
-          align-items: center;
-          gap: 24px;
-        }
-
-        .tr-navbar-actions .tr-login {
-          font-size: 0.85rem;
-          color: rgba(255,255,255,0.5);
-          transition: color 0.25s;
-          text-decoration: none;
-        }
-
-        .tr-navbar-actions .tr-login:hover {
-          color: rgba(255,255,255,0.85);
-        }
-
-        .tr-btn-nav {
-          padding: 9px 22px;
-          font-size: 0.82rem;
-          font-weight: 500;
-          color: #1A1714;
-          background: #C4956A;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          letter-spacing: 0.02em;
-          transition: background 0.25s, transform 0.15s;
-          text-decoration: none;
-          display: inline-block;
-        }
-
-        .tr-btn-nav:hover {
-          background: #B07E55;
-          transform: translateY(-1px);
-        }
 
         .tr-inner {
           max-width: 620px;
@@ -497,14 +464,6 @@ export default function TenantRegisterPage() {
           <Link href="/#how-it-works">How It Works</Link>
           <Link href="/#for-you">For You</Link>
           <Link href="/#pricing">Pricing</Link>
-        </div>
-        <div className="tr-navbar-actions">
-          <Link href="/login" className="tr-login">
-            Log in
-          </Link>
-          <Link href="/register" className="tr-btn-nav">
-            Get Started
-          </Link>
         </div>
       </nav>
 
