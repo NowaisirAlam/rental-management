@@ -126,7 +126,7 @@ export default function Home() {
           align-items: center;
           gap: 10px;
           font-family: var(--serif);
-          font-size: 1.35rem;
+          font-size: 1.8rem;
           color: var(--text-light);
         }
 
@@ -141,7 +141,7 @@ export default function Home() {
         }
 
         .navbar-links a {
-          font-size: 0.85rem;
+          font-size: 1.19rem;
           font-weight: 400;
           color: var(--text-muted);
           letter-spacing: 0.02em;
@@ -159,7 +159,7 @@ export default function Home() {
         }
 
         .navbar-actions .login {
-          font-size: 0.85rem;
+          font-size: 1.3rem;
           color: var(--text-muted);
           transition: color 0.25s;
         }
@@ -170,7 +170,7 @@ export default function Home() {
 
         .btn-nav {
           padding: 9px 22px;
-          font-size: 0.82rem;
+          font-size: 1.2rem;
           font-weight: 500;
           color: var(--bg-dark);
           background: var(--accent);
