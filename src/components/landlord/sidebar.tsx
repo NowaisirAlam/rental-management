@@ -44,8 +44,8 @@ function NavItem({
       href={href}
       className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${
         isActive
-          ? "bg-[#1e1e2e] text-[#5e6ad2]"
-          : "text-[#8a8a8e] hover:bg-[#1c1c1e] hover:text-[#f2f2f7]"
+          ? "bg-[#C4956A] text-[#1A1714]"
+          : "text-[#A99E90] hover:bg-[rgba(196,149,106,0.12)] hover:text-[#C4956A]"
       }`}
     >
       <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={isActive ? 2.5 : 2} />
@@ -118,14 +118,14 @@ export default function LandlordSidebar() {
 
   return (
     <>
-      <aside className="flex h-screen w-56 shrink-0 flex-col bg-[#0f0f10] pt-12 pb-4 px-3">
+      <aside className="flex h-screen w-56 shrink-0 flex-col bg-[#1A1714] pt-12 pb-4 px-3">
 
         {/* Logo */}
         <Link href="/landlord/dashboard" className="flex items-center gap-3 px-2 mb-12">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#5e6ad2] to-[#4a54b8] shadow-md">
-            <Building2 className="h-6 w-6 text-white" strokeWidth={2.5} />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#C4956A] shadow-md">
+            <Building2 className="h-6 w-6 text-[#1A1714]" strokeWidth={2.5} />
           </div>
-          <span className="text-xl font-semibold text-[#f2f2f7]">PropManager</span>
+          <span className="text-xl font-semibold text-[#F0EBE1]">PropManager</span>
         </Link>
 
         {/* Nav */}
