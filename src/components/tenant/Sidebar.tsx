@@ -25,21 +25,6 @@ const NAV_ITEMS = [
   { href: "/tenant/profile",       icon: User,            label: "Profile"         },
 ];
 
-// ── Tooltip ─────────────────────────────────────────────────────────────────────
-
-function Tooltip({ label }: { label: string }) {
-  return (
-    <div className="pointer-events-none absolute left-full ml-3 z-50 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-      <div className="relative flex items-center">
-        <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-800" />
-        <div className="bg-slate-800 text-white text-xs font-medium px-2.5 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
-          {label}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Nav link ─────────────────────────────────────────────────────────────────────
 
 function NavItem({
@@ -56,13 +41,11 @@ function NavItem({
   return (
     <Link
       href={href}
-      className="group relative flex items-center justify-center w-full py-0.5"
+      className="tenant-nav-link"
       data-active={isActive ? "true" : "false"}
     >
-      <div className="tenant-nav-link" data-active={isActive ? "true" : "false"}>
-        <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
-      </div>
-      <Tooltip label={label} />
+      <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
+      <span>{label}</span>
     </Link>
   );
 }
@@ -146,11 +129,11 @@ export default function TenantSidebar() {
       <aside className="tenant-sidebar">
 
         {/* Logo */}
-        <Link href="/tenant/dashboard" className="group relative flex items-center justify-center mb-5">
+        <Link href="/tenant/dashboard" className="tenant-logo-row">
           <div className="tenant-logo">
             <Building2 className="h-5 w-5" strokeWidth={2.5} />
           </div>
-          <Tooltip label="PropManager" />
+          <span className="tenant-brand">PropManager</span>
         </Link>
 
         {/* Main nav */}
@@ -168,12 +151,10 @@ export default function TenantSidebar() {
           {/* Power / logout — sits directly below Profile */}
           <button
             onClick={() => setShowLogoutModal(true)}
-            className="group relative flex items-center justify-center w-full py-0.5 tenant-logout"
+            className="tenant-nav-link tenant-logout"
           >
-            <div className="tenant-nav-link">
-              <Power className="h-5 w-5" strokeWidth={2} />
-            </div>
-            <Tooltip label="Log out" />
+            <Power className="h-5 w-5" strokeWidth={2} />
+            <span>Log out</span>
           </button>
         </nav>
 
