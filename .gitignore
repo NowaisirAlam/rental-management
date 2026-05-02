@@ -55,4 +55,4 @@ dev.db
 .env.local
 node_modules
 
-*.db
+Explaination.txt
