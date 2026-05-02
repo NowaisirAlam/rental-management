@@ -12,6 +12,7 @@ import {
   FileText,
   Bell,
   User,
+  CreditCard,
   Power,
   X,
 } from "lucide-react";
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { href: "/landlord/properties",    icon: Home,            label: "Properties"    },
   { href: "/landlord/leases",        icon: FileText,        label: "Leases"        },
   { href: "/landlord/announcements", icon: Bell,            label: "Announcements" },
+  { href: "/landlord/billing",       icon: CreditCard,      label: "Billing"       },
   { href: "/landlord/profile",       icon: User,            label: "Profile"       },
 ];
 
