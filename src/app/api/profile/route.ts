@@ -8,7 +8,15 @@ export async function GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true, name: true, email: true, phone: true, role: true, propertyId: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      role: true,
+      propertyId: true,
+      subscriptionStatus: true,
+    },
   });
   if (!user) return error("User not found", 404);
 
@@ -32,7 +40,14 @@ export async function PUT(req: Request) {
   const user = await prisma.user.update({
     where: { id: session.user.id },
     data,
-    select: { id: true, name: true, email: true, phone: true, role: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      role: true,
+      subscriptionStatus: true,
+    },
   });
 
   return json(user);
