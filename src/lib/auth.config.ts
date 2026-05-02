@@ -13,6 +13,8 @@ export const authConfig: NextAuthConfig = {
         token.role = (user as any).role as string;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         token.propertyId = (user as any).propertyId as string | null;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        token.subscriptionStatus = (user as any).subscriptionStatus as string | undefined;
       }
       return token;
     },
@@ -23,6 +25,7 @@ export const authConfig: NextAuthConfig = {
         u.id = token.id as string;
         u.role = token.role as string;
         u.propertyId = (token.propertyId as string) ?? null;
+        u.subscriptionStatus = (token.subscriptionStatus as string) ?? "FREE";
       }
       return session;
     },
