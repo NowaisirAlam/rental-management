@@ -4,13 +4,12 @@ import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import TenantSidebar from "@/components/tenant/Sidebar";
-import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 function TenantShell({ children }: { children: React.ReactNode }) {
-  const { resolvedTheme } = useTheme();
   return (
     <div
-      data-theme={resolvedTheme}
+      data-theme="light"
       className="tenant-warm min-h-screen flex overflow-hidden"
     >
       <style jsx global>{`
@@ -21,7 +20,7 @@ function TenantShell({ children }: { children: React.ReactNode }) {
 
         .tenant-main {
           background: #FAF7F2;
-          margin-left: 68px;
+          margin-left: 224px;
           min-height: 100vh;
         }
 
@@ -29,14 +28,14 @@ function TenantShell({ children }: { children: React.ReactNode }) {
           position: fixed;
           left: 0;
           top: 0;
-          width: 68px;
+          width: 224px;
           height: 100vh;
           background: #1A1714;
           border-right: 1px solid rgba(255,255,255,0.08);
           display: flex;
           flex-direction: column;
-          align-items: center;
-          padding: 16px 0;
+          align-items: stretch;
+          padding: 20px 16px;
           z-index: 20;
         }
 
@@ -47,8 +46,8 @@ function TenantShell({ children }: { children: React.ReactNode }) {
         }
 
         .tenant-logo {
-          width: 40px;
-          height: 40px;
+          width: 44px;
+          height: 44px;
           border-radius: 12px;
           display: flex;
           align-items: center;
@@ -56,26 +55,42 @@ function TenantShell({ children }: { children: React.ReactNode }) {
           color: #1A1714;
           background: #C4956A;
           box-shadow: 0 8px 20px rgba(196,149,106,0.22);
-          margin-bottom: 20px;
+          margin-bottom: 10px;
+        }
+
+        .tenant-logo-row {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 0 4px;
+          margin-bottom: 24px;
+        }
+
+        .tenant-brand {
+          color: #F0EBE1;
+          font-size: 18px;
+          font-weight: 600;
+          letter-spacing: -0.02em;
         }
 
         .tenant-nav {
           display: flex;
           flex: 1;
           flex-direction: column;
-          align-items: center;
-          gap: 12px;
+          gap: 6px;
           width: 100%;
         }
 
         .tenant-nav-link {
           display: flex;
           align-items: center;
-          justify-content: center;
-          width: 40px;
-          height: 40px;
+          gap: 12px;
+          width: 100%;
+          padding: 8px 10px;
           border-radius: 12px;
-          color: rgba(255,255,255,0.48);
+          color: rgba(255,255,255,0.62);
+          font-size: 14px;
+          font-weight: 500;
           transition: color 0.2s, background 0.2s;
         }
 
@@ -95,7 +110,13 @@ function TenantShell({ children }: { children: React.ReactNode }) {
         }
 
         .tenant-logout {
-          margin-top: auto;
+          margin-top: 4px;
+          color: rgba(255,255,255,0.55);
+        }
+
+        .tenant-logout:hover {
+          color: #A04040;
+          background: rgba(160,64,64,0.16);
         }
 
         .tenant-warm .bg-white { background-color: #FFFDF9 !important; }
@@ -137,15 +158,30 @@ function TenantShell({ children }: { children: React.ReactNode }) {
             width: 100%;
             height: auto;
             flex-direction: row;
-            justify-content: flex-start;
-            gap: 14px;
+            align-items: center;
+            gap: 12px;
             padding: 14px 16px;
             overflow-x: auto;
+          }
+          .tenant-logo-row {
+            margin-bottom: 0;
+            padding: 0;
+          }
+          .tenant-brand {
+            display: none;
           }
           .tenant-nav {
             flex-direction: row;
             width: auto;
-            gap: 12px;
+            gap: 8px;
+          }
+          .tenant-nav-link {
+            width: 40px;
+            justify-content: center;
+            padding: 8px;
+          }
+          .tenant-nav-link span {
+            display: none;
           }
           .tenant-logout { margin-top: 0; margin-left: auto; }
         }
