@@ -25,21 +25,6 @@ const NAV_ITEMS = [
   { href: "/tenant/profile",       icon: User,            label: "Profile"         },
 ];
 
-// ── Tooltip ─────────────────────────────────────────────────────────────────────
-
-function Tooltip({ label }: { label: string }) {
-  return (
-    <div className="pointer-events-none absolute left-full ml-3 z-50 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-      <div className="relative flex items-center">
-        <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-800" />
-        <div className="bg-slate-800 text-white text-xs font-medium px-2.5 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
-          {label}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Nav link ─────────────────────────────────────────────────────────────────────
 
 function NavItem({
@@ -54,17 +39,13 @@ function NavItem({
   isActive: boolean;
 }) {
   return (
-    <Link href={href} className="group relative flex items-center justify-center w-full py-0.5">
-      <div
-        className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 ${
-          isActive
-            ? "bg-blue-600 text-white shadow-sm"
-            : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-        }`}
-      >
-        <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
-      </div>
-      <Tooltip label={label} />
+    <Link
+      href={href}
+      className="tenant-nav-link"
+      data-active={isActive ? "true" : "false"}
+    >
+      <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
+      <span>{label}</span>
     </Link>
   );
 }
@@ -123,7 +104,7 @@ function LogoutModal({
           </button>
           <button
             onClick={onConfirm}
-            className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 active:scale-95"
+            className="rounded-lg bg-[#C4956A] px-4 py-2 text-sm font-semibold text-[#1A1714] shadow-sm transition hover:bg-[#B07E55] active:scale-95"
           >
             Log out
           </button>
@@ -145,20 +126,18 @@ export default function TenantSidebar() {
 
   return (
     <>
-      <aside className="flex h-screen w-16 shrink-0 flex-col items-center border-r border-slate-200 bg-white py-4">
+      <aside className="tenant-sidebar">
 
         {/* Logo */}
-        <Link href="/tenant/dashboard" className="group relative flex items-center justify-center mb-5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 shadow-md transition-all group-hover:shadow-lg">
-            <Building2 className="h-5 w-5 text-white" strokeWidth={2.5} />
+        <Link href="/tenant/dashboard" className="tenant-logo-row">
+          <div className="tenant-logo">
+            <Building2 className="h-5 w-5" strokeWidth={2.5} />
           </div>
-          <Tooltip label="PropManager" />
+          <span className="tenant-brand">PropManager</span>
         </Link>
 
-        <div className="w-8 border-t border-slate-100 mb-4" />
-
         {/* Main nav */}
-        <nav className="flex flex-col items-center gap-1 flex-1 w-full px-3">
+        <nav className="tenant-nav">
           {NAV_ITEMS.map((item) => (
             <NavItem
               key={item.href}
@@ -172,12 +151,10 @@ export default function TenantSidebar() {
           {/* Power / logout — sits directly below Profile */}
           <button
             onClick={() => setShowLogoutModal(true)}
-            className="group relative flex items-center justify-center w-full py-0.5"
+            className="tenant-nav-link tenant-logout"
           >
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200">
-              <Power className="h-5 w-5" strokeWidth={2} />
-            </div>
-            <Tooltip label="Log out" />
+            <Power className="h-5 w-5" strokeWidth={2} />
+            <span>Log out</span>
           </button>
         </nav>
 

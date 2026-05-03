@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PropManager Tenant Dashboard Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --page: #FAF7F2;
+      --sidebar: #1A1714;
+      --card: #FFFDF9;
+      --card-soft: #F0EBE1;
+      --border: #DDD5C8;
+      --text: #2D2A26;
+      --muted: #7A7267;
+      --muted-light: #A99E90;
+      --accent: #C4956A;
+      --accent-hover: #B07E55;
+      --accent-soft: rgba(196,149,106,0.16);
+      --green: #6B8F5E;
+      --orange: #C47A3A;
+      --red: #A04040;
+      --white: #FFFFFF;
+      --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--page);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .shell {
+      display: flex;
+      min-height: 100vh;
+      background: var(--page);
+    }
+
+    .sidebar {
+      width: 68px;
+      height: 100vh;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 0;
+      background: var(--sidebar);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 20;
+    }
+
+    .side-logo,
+    .side-link,
+    .side-logout {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+    }
+
+    .side-logo {
+      margin-bottom: 20px;
+      color: var(--sidebar);
+      background: var(--accent);
+      box-shadow: 0 8px 20px rgba(196,149,106,0.22);
+    }
+
+    .side-logo svg,
+    .side-link svg,
+    .side-logout svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2;
+    }
+
+    .side-nav {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+    }
+    .side-link {
+      color: rgba(255,255,255,0.48);
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .side-link.active {
+      color: var(--sidebar);
+      background: var(--accent);
+    }
+
+    .side-link:hover {
+      color: var(--accent);
+      background: rgba(196,149,106,0.12);
+    }
+
+    .side-link.active:hover {
+      color: var(--sidebar);
+      background: var(--accent-hover);
+    }
+
+    .side-logout {
+      margin-top: auto;
+      color: rgba(255,255,255,0.48);
+    }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      overflow-y: auto;
+      margin-left: 68px;
+    }
+
+    .page {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 38px 32px 80px;
+    }
+
+    .header {
+      margin-bottom: 36px;
+    }
+
+    .header h1 {
+      font-size: 23px;
+      line-height: 1.2;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.03em;
+    }
+
+    .header p {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--card);
+      box-shadow: 0 2px 6px rgba(26,23,20,0.04);
+    }
+
+    .stat-card {
+      min-height: 146px;
+      padding: 22px;
+    }
+
+    .stat-top,
+    .panel-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .stat-label {
+      color: var(--muted-light);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .stat-icon {
+      width: 16px;
+      height: 16px;
+      color: var(--muted-light);
+      stroke-width: 2;
+    }
+
+    .stat-value {
+      margin-top: 18px;
+      color: var(--text);
+      font-size: 27px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .stat-value.small {
+      font-size: 19px;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-sub {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.4;
+    }
+
+    .stat-sub svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2;
+    }
+
+    .stat-sub.red {
+      color: var(--red);
+      font-weight: 600;
+    }
+
+    .actions {
+      margin-top: 28px;
+      padding: 28px;
+    }
+
+    .section-title {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 48px;
+      padding: 0 18px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      background: var(--card);
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .btn svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2;
+    }
+
+    .btn.primary {
+      border-color: var(--accent);
+      color: var(--sidebar);
+      background: var(--accent);
+      box-shadow: 0 2px 4px rgba(196,149,106,0.18);
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      background: var(--card-soft);
+    }
+
+    .btn.primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .lower {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 28px;
+      margin-top: 28px;
+    }
+
+    .panel {
+      min-height: 312px;
+      padding: 28px;
+    }
+
+    .view-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--accent-hover);
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .view-link svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2;
+    }
+
+    .empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 210px;
+      color: var(--muted-light);
+      font-size: 11px;
+    }
+
+    .announcement-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .announcement {
+      padding: 16px 18px;
+      border-radius: 12px;
+      background: var(--bg-warm);
+    }
+
+    .announcement-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .announcement-title {
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .announcement-body {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.5;
+    }
+
+    .announcement-date {
+      margin-top: 10px;
+      color: var(--muted-light);
+      font-size: 9px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 8px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .badge.warning {
+      color: #9A6435;
+      background: #F6E2BF;
+    }
+
+    .badge.info {
+      color: #6F5B48;
+      background: #E9DED0;
+    }
+
+    @media (max-width: 980px) {
+      .page {
+        max-width: 760px;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .lower {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        display: block;
+      }
+
+      .sidebar {
+        top: 0;
+        z-index: 20;
+        width: 100%;
+        min-height: auto;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 14px;
+        padding: 14px 16px;
+        overflow-x: auto;
+      }
+
+      .side-logo {
+        margin-bottom: 0;
+      }
+
+      .side-nav {
+        flex: 0 0 auto;
+        flex-direction: row;
+        width: auto;
+      }
+
+      .side-logout {
+        margin-top: 0;
+        margin-left: auto;
+      }
+
+      .page {
+        padding: 28px 18px 48px;
+      }
+
+      .main {
+        margin-left: 0;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .action-row {
+        display: grid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar" aria-label="Tenant navigation">
+      <a class="side-logo" href="#" aria-label="PropManager">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+          <path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14" />
+          <path d="M7 21v-8h10v8" />
+          <path d="M12 13v8" />
+        </svg>
+      </a>
+
+      <nav class="side-nav">
+        <a class="side-link active" href="#" aria-label="Dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+        </a>
+        <a class="side-link" href="#" aria-label="Rent and Payments">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <rect x="2" y="5" width="20" height="14" rx="2" />
+            <line x1="2" y1="10" x2="22" y2="10" />
+          </svg>
+        </a>
+        <a class="side-link" href="#" aria-label="Maintenance">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+          </svg>
+        </a>
+        <a class="side-link" href="#" aria-label="Lease Info">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <path d="M14 2v6h6" />
+            <line x1="8" y1="13" x2="16" y2="13" />
+            <line x1="8" y1="17" x2="16" y2="17" />
+          </svg>
+        </a>
+        <a class="side-link" href="#" aria-label="Announcements">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+        </a>
+        <a class="side-link" href="#" aria-label="Profile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </a>
+      </nav>
+
+      <a class="side-logout" href="#" aria-label="Log out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+          <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
+          <line x1="12" y1="2" x2="12" y2="12" />
+        </svg>
+      </a>
+    </aside>
+
+    <main class="main">
+      <div class="page">
+        <header class="header">
+          <h1>Dashboard</h1>
+          <p>Maple Apartments &middot; 123 Maple Street, Springfield</p>
+        </header>
+
+        <section class="stats" aria-label="Dashboard summary">
+          <article class="card stat-card">
+            <div class="stat-top">
+              <p class="stat-label">Rent Due</p>
+              <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <line x1="2" y1="10" x2="22" y2="10" />
+              </svg>
+            </div>
+            <p class="stat-value">$1,500</p>
+            <p class="stat-sub red">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              Overdue
+            </p>
+          </article>
+
+          <article class="card stat-card">
+            <div class="stat-top">
+              <p class="stat-label">Due Date</p>
+              <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+            </div>
+            <p class="stat-value small">Mar 31, 2026</p>
+            <p class="stat-sub">30 days overdue</p>
+          </article>
+
+          <article class="card stat-card">
+            <div class="stat-top">
+              <p class="stat-label">Lease Ends</p>
+              <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v6l4 2" />
+              </svg>
+            </div>
+            <p class="stat-value small">&mdash;</p>
+            <p class="stat-sub">Not available</p>
+          </article>
+
+          <article class="card stat-card">
+            <div class="stat-top">
+              <p class="stat-label">Maintenance</p>
+              <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+              </svg>
+            </div>
+            <p class="stat-value">0</p>
+            <p class="stat-sub">Open requests</p>
+          </article>
+        </section>
+
+        <section class="card actions" aria-labelledby="actions-title">
+          <h2 id="actions-title" class="section-title">Quick Actions</h2>
+          <div class="action-row">
+            <button class="btn primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <line x1="2" y1="10" x2="22" y2="10" />
+              </svg>
+              Pay Rent
+            </button>
+            <button class="btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+              </svg>
+              New Maintenance Request
+            </button>
+            <button class="btn">View Lease</button>
+          </div>
+        </section>
+
+        <section class="lower">
+          <article class="card panel">
+            <div class="panel-top">
+              <h2 class="section-title">Recent Maintenance</h2>
+              <a class="view-link" href="#">
+                View all
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                  <path d="M5 12h14" />
+                  <path d="m12 5 7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+            <div class="empty">No maintenance requests yet.</div>
+          </article>
+
+          <article class="card panel">
+            <div class="panel-top">
+              <h2 class="section-title">Announcements</h2>
+              <a class="view-link" href="#">
+                View all
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                  <path d="M5 12h14" />
+                  <path d="m12 5 7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+
+            <div class="announcement-list">
+              <div class="announcement">
+                <div class="announcement-head">
+                  <p class="announcement-title">Scheduled water shut-off &mdash; Feb 3</p>
+                  <span class="badge warning">warning</span>
+                </div>
+                <p class="announcement-body">Building maintenance will shut off water from 9 AM &ndash; 12 PM on Feb 3.</p>
+                <p class="announcement-date">Jan 29, 2026</p>
+              </div>
+
+              <div class="announcement">
+                <div class="announcement-head">
+                  <p class="announcement-title">Lobby renovation complete</p>
+                  <span class="badge info">info</span>
+                </div>
+                <p class="announcement-body">The lobby renovation is finished. Enjoy the new look!</p>
+                <p class="announcement-date">Jan 25, 2026</p>
+              </div>
+            </div>
+          </article>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

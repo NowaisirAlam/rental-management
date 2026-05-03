@@ -5,9 +5,6 @@ import { useRouter } from "next/navigation";
 import { CheckCircle2, Eye, EyeOff, X } from "lucide-react";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import Navbar from "@/components/Navbar";
-
-// ── Types ──────────────────────────────────────────────────────────────────────
 
 type FormFields = {
   fullName: string;
@@ -23,63 +20,46 @@ type FormFields = {
   agreeToTerms: boolean;
 };
 
-// ── Validation ─────────────────────────────────────────────────────────────────
-
 function validate(fields: FormFields): Record<string, string> {
   const errs: Record<string, string> = {};
-
   if (!fields.fullName.trim()) errs.fullName = "Full name is required.";
-
   if (!fields.email.trim()) {
     errs.email = "Email is required.";
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) {
     errs.email = "Enter a valid email address.";
   }
-
   if (!fields.phone.trim()) {
     errs.phone = "Phone number is required.";
-  } else if (!/^\+?[\d\s\-()\u00A0]{7,}$/.test(fields.phone)) {
+  } else if (!/^\+?[\d\s\-() ]{7,}$/.test(fields.phone)) {
     errs.phone = "Enter a valid phone number.";
   }
-
   if (!fields.password) {
     errs.password = "Password is required.";
   } else if (fields.password.length < 8) {
     errs.password = "Password must be at least 8 characters.";
   }
-
   if (!fields.confirmPassword) {
     errs.confirmPassword = "Please confirm your password.";
   } else if (fields.confirmPassword !== fields.password) {
     errs.confirmPassword = "Passwords do not match.";
   }
-
   if (!fields.apartmentOrUnitNumber.trim())
     errs.apartmentOrUnitNumber = "Apartment / Unit number is required.";
-
   if (!fields.buildingOrInvitationCode.trim())
     errs.buildingOrInvitationCode = "Building / Invitation code is required.";
-
   if (!fields.moveInDate.trim()) errs.moveInDate = "Move-in date is required.";
-
   if (!fields.emergencyContactName.trim())
     errs.emergencyContactName = "Emergency contact name is required.";
-
   if (!fields.emergencyContactPhone.trim())
     errs.emergencyContactPhone = "Emergency contact phone is required.";
-
   if (!fields.agreeToTerms)
     errs.agreeToTerms = "You must agree to the Terms & Privacy Policy.";
-
   return errs;
 }
-
-// ── Component ──────────────────────────────────────────────────────────────────
 
 export default function TenantRegisterPage() {
   const router = useRouter();
 
-  // Field values
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -92,15 +72,12 @@ export default function TenantRegisterPage() {
   const [emergencyContactPhone, setEmergencyContactPhone] = useState("");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
 
-  // UI state
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [serverError, setServerError] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-
-  // Validation state
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -125,19 +102,13 @@ export default function TenantRegisterPage() {
     const errs = validate(currentFields());
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
-
     setIsLoading(true);
-
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: fullName, email, password, role: "TENANT",
-      }),
+      body: JSON.stringify({ name: fullName, email, password, role: "TENANT" }),
     });
-
     const data = await res.json();
-
     if (!res.ok) {
       if (data.errors) {
         setErrors(data.errors);
@@ -148,367 +119,557 @@ export default function TenantRegisterPage() {
       setIsLoading(false);
       return;
     }
-
     setIsLoading(false);
     setShowSuccessModal(true);
   };
 
-  // Shared Tailwind helpers
-  const inputBase =
-    "mt-2 w-full rounded-lg border bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition duration-200 focus:outline-none focus:ring-2";
-  const inputDefault = "border-slate-300 focus:border-blue-500 focus:ring-blue-500/20";
-  const inputError = "border-red-400 focus:border-red-500 focus:ring-red-500/20";
-
-  const inputClass = (field: string) =>
-    `${inputBase} ${showError(field) ? inputError : inputDefault}`;
-
   return (
     <>
-      <Navbar />
+      <style>{`
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white px-4 py-14">
-        <div className="mx-auto max-w-2xl">
+        html { scroll-behavior: smooth; }
 
-          {/* Back link */}
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition duration-200 hover:text-slate-800"
-          >
-            <span>←</span> Back to role selection
+        .tr-page {
+          min-height: 100vh;
+          background: #FAF7F2;
+          font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
+          padding: 128px 24px 80px;
+        }
+
+        .tr-navbar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 100;
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          padding: 0 56px;
+          height: 72px;
+          background: rgba(26,23,20,0.92);
+          backdrop-filter: blur(20px);
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .tr-navbar-brand {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-family: var(--font-playfair), Georgia, serif;
+          font-size: 1.35rem;
+          color: rgba(255,255,255,0.85);
+          text-decoration: none;
+        }
+
+        .tr-navbar-brand svg {
+          width: 26px;
+          height: 26px;
+        }
+
+        .tr-navbar-links {
+          display: flex;
+          gap: 36px;
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+
+        .tr-navbar-links a {
+          font-size: 1.19rem;
+          font-weight: 400;
+          color: rgba(255,255,255,0.5);
+          letter-spacing: 0.02em;
+          transition: color 0.25s;
+          text-decoration: none;
+        }
+
+        .tr-navbar-links a:hover {
+          color: rgba(255,255,255,0.85);
+        }
+
+
+        .tr-inner {
+          max-width: 620px;
+          margin: 0 auto;
+        }
+
+        .tr-back {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          font-size: 0.88rem;
+          color: #7A7267;
+          text-decoration: none;
+          margin-bottom: 28px;
+          transition: color 0.2s;
+        }
+        .tr-back:hover { color: #2D2A26; }
+
+        .tr-card {
+          background: #FFFDF9;
+          border: 1px solid #DDD5C8;
+          border-radius: 16px;
+          padding: 44px 48px;
+        }
+
+        .tr-label-tag {
+          font-size: 0.75rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: #C4956A;
+          margin-bottom: 10px;
+        }
+
+        .tr-card h1 {
+          font-family: var(--font-playfair), Georgia, serif;
+          font-size: 2.2rem;
+          font-weight: 400;
+          color: #2D2A26;
+          margin-bottom: 8px;
+          line-height: 1.2;
+        }
+
+        .tr-card > p {
+          font-size: 0.95rem;
+          color: #7A7267;
+          margin-bottom: 0;
+        }
+
+        .tr-error-banner {
+          margin-top: 20px;
+          padding: 13px 16px;
+          border-radius: 8px;
+          border: 1px solid rgba(160,64,64,0.3);
+          background: rgba(160,64,64,0.07);
+          font-size: 0.9rem;
+          color: #A04040;
+        }
+
+        /* Section divider */
+        .tr-divider {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          margin: 32px 0 24px;
+          color: #b5ac9e;
+          font-size: 0.72rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+        }
+        .tr-divider::before, .tr-divider::after {
+          content: '';
+          flex: 1;
+          height: 1px;
+          background: #DDD5C8;
+        }
+
+        /* Fields */
+        .tr-fields { display: flex; flex-direction: column; gap: 20px; }
+        .tr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        .tr-field label {
+          display: block;
+          font-size: 0.78rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: #7A7267;
+          margin-bottom: 8px;
+        }
+
+        .tr-field input[type="text"],
+        .tr-field input[type="email"],
+        .tr-field input[type="tel"],
+        .tr-field input[type="password"],
+        .tr-field input[type="date"] {
+          width: 100%;
+          padding: 13px 16px;
+          font-size: 0.95rem;
+          font-family: inherit;
+          color: #2D2A26;
+          background: #F0EBE1;
+          border: 1px solid #DDD5C8;
+          border-radius: 8px;
+          outline: none;
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .tr-field input:focus {
+          border-color: #C4956A;
+          box-shadow: 0 0 0 3px rgba(196,149,106,0.15);
+        }
+        .tr-field input.has-error {
+          border-color: #A04040;
+        }
+        .tr-field input.has-error:focus {
+          box-shadow: 0 0 0 3px rgba(160,64,64,0.12);
+        }
+        .tr-field input::placeholder { color: #b5ac9e; }
+
+        .tr-pw-wrap { position: relative; }
+        .tr-pw-wrap input { padding-right: 44px; }
+        .tr-eye {
+          position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
+          background: none; border: none; cursor: pointer;
+          color: #7A7267; display: flex; align-items: center; padding: 0;
+          transition: color 0.2s;
+        }
+        .tr-eye:hover { color: #2D2A26; }
+
+        .tr-field-error {
+          margin-top: 5px;
+          font-size: 0.78rem;
+          color: #A04040;
+        }
+
+        /* Checkbox */
+        .tr-check-wrap {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          cursor: pointer;
+        }
+        .tr-check-wrap input[type="checkbox"] {
+          width: 17px;
+          height: 17px;
+          margin-top: 1px;
+          flex-shrink: 0;
+          accent-color: #C4956A;
+          cursor: pointer;
+        }
+        .tr-check-wrap span {
+          font-size: 0.9rem;
+          color: #7A7267;
+          line-height: 1.5;
+        }
+        .tr-check-wrap span a {
+          color: #C4956A;
+          font-weight: 600;
+          text-decoration: none;
+          transition: color 0.2s;
+        }
+        .tr-check-wrap span a:hover { color: #B07E55; text-decoration: underline; }
+
+        /* Submit */
+        .tr-submit {
+          width: 100%;
+          margin-top: 32px;
+          padding: 15px;
+          font-size: 0.88rem;
+          font-weight: 700;
+          font-family: inherit;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: #FAF7F2;
+          background: #1A1714;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background 0.25s, transform 0.15s;
+        }
+        .tr-submit:hover:not(:disabled) { background: #2D2826; transform: translateY(-1px); }
+        .tr-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+
+        .tr-footer-link {
+          margin-top: 24px;
+          text-align: center;
+          font-size: 0.9rem;
+          color: #7A7267;
+        }
+        .tr-footer-link a {
+          color: #C4956A;
+          font-weight: 600;
+          text-decoration: none;
+          transition: color 0.2s;
+        }
+        .tr-footer-link a:hover { color: #B07E55; }
+
+        /* Success modal */
+        .tr-modal-backdrop {
+          position: fixed; inset: 0; z-index: 50;
+          display: flex; align-items: center; justify-content: center; padding: 16px;
+        }
+        .tr-modal-overlay {
+          position: absolute; inset: 0;
+          background: rgba(13,9,6,0.5); backdrop-filter: blur(4px);
+        }
+        .tr-modal {
+          position: relative; z-index: 10;
+          width: 100%; max-width: 360px;
+          background: #FFFDF9;
+          border: 1px solid #DDD5C8;
+          border-radius: 16px;
+          padding: 32px;
+          box-shadow: 0 20px 60px rgba(13,9,6,0.25);
+        }
+        .tr-modal-close {
+          position: absolute; right: 16px; top: 16px;
+          display: flex; align-items: center; justify-content: center;
+          width: 28px; height: 28px; border-radius: 8px;
+          background: none; border: none; cursor: pointer;
+          color: #7A7267; transition: background 0.2s, color 0.2s;
+        }
+        .tr-modal-close:hover { background: #F0EBE1; color: #2D2A26; }
+        .tr-modal-icon {
+          width: 44px; height: 44px; border-radius: 50%;
+          background: rgba(107,143,94,0.12);
+          display: flex; align-items: center; justify-content: center;
+          margin-bottom: 16px;
+        }
+        .tr-modal h3 {
+          font-family: var(--font-playfair), Georgia, serif;
+          font-size: 1.3rem;
+          font-weight: 400;
+          color: #2D2A26;
+          margin-bottom: 8px;
+        }
+        .tr-modal p {
+          font-size: 0.88rem;
+          color: #7A7267;
+          line-height: 1.6;
+          margin-bottom: 24px;
+        }
+        .tr-modal-btn {
+          width: 100%;
+          padding: 13px;
+          font-size: 0.88rem;
+          font-weight: 700;
+          font-family: inherit;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #FAF7F2;
+          background: #1A1714;
+          border: none; border-radius: 8px;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+        .tr-modal-btn:hover { background: #2D2826; }
+
+        @media (max-width: 640px) {
+          .tr-card { padding: 28px 20px; }
+          .tr-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
+      <nav className="tr-navbar" id="navbar">
+        <Link href="/" className="tr-navbar-brand">
+          <LogoIcon />
+          PropManager
+        </Link>
+        <div className="tr-navbar-links">
+          <Link href="/#features">Features</Link>
+          <Link href="/#how-it-works">How It Works</Link>
+          <Link href="/#for-you">For You</Link>
+          <Link href="/#pricing">Pricing</Link>
+        </div>
+      </nav>
+
+      <div className="tr-page">
+        <div className="tr-inner">
+
+          <Link href="/register" className="tr-back">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 5l-7 7 7 7"/>
+            </svg>
+            Back to role selection
           </Link>
 
-          {/* Card */}
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm md:p-10">
+          <div className="tr-card">
+            <p className="tr-label-tag">Tenant Registration</p>
+            <h1>Create your tenant account</h1>
+            <p>Fill in your details below to get started with PropManager.</p>
 
-            {/* Header */}
-            <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
-              Tenant Registration
-            </p>
-            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-900">
-              Create your tenant account
-            </h1>
-            <p className="mt-2 text-sm text-slate-600">
-              Fill in your details below to get started with PropManager.
-            </p>
-
-            {/* Server error banner */}
             {serverError && (
-              <div className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {serverError}
-              </div>
+              <div className="tr-error-banner">{serverError}</div>
             )}
 
             <form onSubmit={handleSubmit} noValidate>
 
-              {/* ── Section A: Account Credentials ───────────────────────── */}
-              <SectionDivider label="Account Credentials" />
+              {/* Account Credentials */}
+              <div className="tr-divider">Account Credentials</div>
+              <div className="tr-fields">
 
-              <div className="mt-5 space-y-5">
-
-                {/* Full Name */}
-                <div>
-                  <label htmlFor="fullName" className="block text-sm font-medium text-slate-700">
-                    Full Name
-                  </label>
-                  <input
-                    id="fullName"
-                    type="text"
-                    value={fullName}
+                <div className="tr-field">
+                  <label htmlFor="fullName">Full Name</label>
+                  <input id="fullName" type="text" value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     onBlur={() => handleBlur("fullName")}
                     placeholder="Jane Smith"
-                    className={inputClass("fullName")}
+                    className={showError("fullName") ? "has-error" : ""}
                   />
-                  {showError("fullName") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.fullName}</p>
-                  )}
+                  {showError("fullName") && <p className="tr-field-error">{errors.fullName}</p>}
                 </div>
 
-                {/* Email */}
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-                    Email Address
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
+                <div className="tr-field">
+                  <label htmlFor="email">Email Address</label>
+                  <input id="email" type="email" value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onBlur={() => handleBlur("email")}
                     placeholder="you@example.com"
-                    className={inputClass("email")}
+                    className={showError("email") ? "has-error" : ""}
                   />
-                  {showError("email") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.email}</p>
-                  )}
+                  {showError("email") && <p className="tr-field-error">{errors.email}</p>}
                 </div>
 
-                {/* Phone */}
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-slate-700">
-                    Phone Number
-                  </label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    value={phone}
+                <div className="tr-field">
+                  <label htmlFor="phone">Phone Number</label>
+                  <input id="phone" type="tel" value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     onBlur={() => handleBlur("phone")}
                     placeholder="+1 (555) 000-0000"
-                    className={inputClass("phone")}
+                    className={showError("phone") ? "has-error" : ""}
                   />
-                  {showError("phone") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.phone}</p>
-                  )}
+                  {showError("phone") && <p className="tr-field-error">{errors.phone}</p>}
                 </div>
 
-                {/* Password */}
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-slate-700">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
+                <div className="tr-field">
+                  <label htmlFor="password">Password</label>
+                  <div className="tr-pw-wrap">
+                    <input id="password" type={showPassword ? "text" : "password"} value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       onBlur={() => handleBlur("password")}
                       placeholder="Min. 8 characters"
-                      className={`${inputClass("password")} pr-10`}
+                      className={showError("password") ? "has-error" : ""}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition duration-200 hover:text-slate-800"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    <button type="button" className="tr-eye" onClick={() => setShowPassword(v => !v)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}>
+                      {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                     </button>
                   </div>
-                  {showError("password") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.password}</p>
-                  )}
+                  {showError("password") && <p className="tr-field-error">{errors.password}</p>}
                 </div>
 
-                {/* Confirm Password */}
-                <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700">
-                    Confirm Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      value={confirmPassword}
+                <div className="tr-field">
+                  <label htmlFor="confirmPassword">Confirm Password</label>
+                  <div className="tr-pw-wrap">
+                    <input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       onBlur={() => handleBlur("confirmPassword")}
                       placeholder="Re-enter your password"
-                      className={`${inputClass("confirmPassword")} pr-10`}
+                      className={showError("confirmPassword") ? "has-error" : ""}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition duration-200 hover:text-slate-800"
-                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                    >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    <button type="button" className="tr-eye" onClick={() => setShowConfirmPassword(v => !v)}
+                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}>
+                      {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                     </button>
                   </div>
-                  {showError("confirmPassword") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>
-                  )}
+                  {showError("confirmPassword") && <p className="tr-field-error">{errors.confirmPassword}</p>}
                 </div>
 
               </div>
 
-              {/* ── Section B: Lease Details ──────────────────────────────── */}
-              <SectionDivider label="Lease Details" />
+              {/* Lease Details */}
+              <div className="tr-divider">Lease Details</div>
+              <div className="tr-grid">
 
-              <div className="mt-5 grid gap-4 md:grid-cols-2">
-
-                {/* Apartment / Unit Number */}
-                <div>
-                  <label htmlFor="apartmentOrUnitNumber" className="block text-sm font-medium text-slate-700">
-                    Apartment / Unit Number
-                  </label>
-                  <input
-                    id="apartmentOrUnitNumber"
-                    type="text"
-                    value={apartmentOrUnitNumber}
+                <div className="tr-field">
+                  <label htmlFor="apartmentOrUnitNumber">Apartment / Unit Number</label>
+                  <input id="apartmentOrUnitNumber" type="text" value={apartmentOrUnitNumber}
                     onChange={(e) => setApartmentOrUnitNumber(e.target.value)}
                     onBlur={() => handleBlur("apartmentOrUnitNumber")}
                     placeholder="e.g. 4B"
-                    className={inputClass("apartmentOrUnitNumber")}
+                    className={showError("apartmentOrUnitNumber") ? "has-error" : ""}
                   />
-                  {showError("apartmentOrUnitNumber") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.apartmentOrUnitNumber}</p>
-                  )}
+                  {showError("apartmentOrUnitNumber") && <p className="tr-field-error">{errors.apartmentOrUnitNumber}</p>}
                 </div>
 
-                {/* Building / Invitation Code */}
-                <div>
-                  <label htmlFor="buildingOrInvitationCode" className="block text-sm font-medium text-slate-700">
-                    Building / Invitation Code
-                  </label>
-                  <input
-                    id="buildingOrInvitationCode"
-                    type="text"
-                    value={buildingOrInvitationCode}
+                <div className="tr-field">
+                  <label htmlFor="buildingOrInvitationCode">Building / Invitation Code</label>
+                  <input id="buildingOrInvitationCode" type="text" value={buildingOrInvitationCode}
                     onChange={(e) => setBuildingOrInvitationCode(e.target.value)}
                     onBlur={() => handleBlur("buildingOrInvitationCode")}
                     placeholder="Provided by your landlord"
-                    className={inputClass("buildingOrInvitationCode")}
+                    className={showError("buildingOrInvitationCode") ? "has-error" : ""}
                   />
-                  {showError("buildingOrInvitationCode") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.buildingOrInvitationCode}</p>
-                  )}
+                  {showError("buildingOrInvitationCode") && <p className="tr-field-error">{errors.buildingOrInvitationCode}</p>}
                 </div>
 
-                {/* Move-in Date */}
-                <div>
-                  <label htmlFor="moveInDate" className="block text-sm font-medium text-slate-700">
-                    Move-in Date
-                  </label>
-                  <input
-                    id="moveInDate"
-                    type="date"
-                    value={moveInDate}
+                <div className="tr-field">
+                  <label htmlFor="moveInDate">Move-in Date</label>
+                  <input id="moveInDate" type="date" value={moveInDate}
                     onChange={(e) => setMoveInDate(e.target.value)}
                     onBlur={() => handleBlur("moveInDate")}
-                    className={inputClass("moveInDate")}
+                    className={showError("moveInDate") ? "has-error" : ""}
                   />
-                  {showError("moveInDate") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.moveInDate}</p>
-                  )}
+                  {showError("moveInDate") && <p className="tr-field-error">{errors.moveInDate}</p>}
                 </div>
 
-                {/* Emergency Contact Name */}
-                <div>
-                  <label htmlFor="emergencyContactName" className="block text-sm font-medium text-slate-700">
-                    Emergency Contact Name
-                  </label>
-                  <input
-                    id="emergencyContactName"
-                    type="text"
-                    value={emergencyContactName}
+                <div className="tr-field">
+                  <label htmlFor="emergencyContactName">Emergency Contact Name</label>
+                  <input id="emergencyContactName" type="text" value={emergencyContactName}
                     onChange={(e) => setEmergencyContactName(e.target.value)}
                     onBlur={() => handleBlur("emergencyContactName")}
                     placeholder="e.g. John Smith"
-                    className={inputClass("emergencyContactName")}
+                    className={showError("emergencyContactName") ? "has-error" : ""}
                   />
-                  {showError("emergencyContactName") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.emergencyContactName}</p>
-                  )}
+                  {showError("emergencyContactName") && <p className="tr-field-error">{errors.emergencyContactName}</p>}
                 </div>
 
-                {/* Emergency Contact Phone */}
-                <div className="md:col-span-2">
-                  <label htmlFor="emergencyContactPhone" className="block text-sm font-medium text-slate-700">
-                    Emergency Contact Phone
-                  </label>
-                  <input
-                    id="emergencyContactPhone"
-                    type="tel"
-                    value={emergencyContactPhone}
+                <div className="tr-field" style={{ gridColumn: "1 / -1" }}>
+                  <label htmlFor="emergencyContactPhone">Emergency Contact Phone</label>
+                  <input id="emergencyContactPhone" type="tel" value={emergencyContactPhone}
                     onChange={(e) => setEmergencyContactPhone(e.target.value)}
                     onBlur={() => handleBlur("emergencyContactPhone")}
                     placeholder="+1 (555) 000-0000"
-                    className={`${inputClass("emergencyContactPhone")} md:max-w-xs`}
+                    style={{ maxWidth: "50%" }}
+                    className={showError("emergencyContactPhone") ? "has-error" : ""}
                   />
-                  {showError("emergencyContactPhone") && (
-                    <p className="mt-1 text-xs text-red-500">{errors.emergencyContactPhone}</p>
-                  )}
+                  {showError("emergencyContactPhone") && <p className="tr-field-error">{errors.emergencyContactPhone}</p>}
                 </div>
 
               </div>
 
-              {/* ── Section C: Agreement ──────────────────────────────────── */}
-              <SectionDivider label="Agreement" />
-
-              <div className="mt-5">
-                <label className="flex cursor-pointer items-start gap-3">
-                  <input
-                    id="agreeToTerms"
-                    type="checkbox"
-                    checked={agreeToTerms}
+              {/* Agreement */}
+              <div className="tr-divider">Agreement</div>
+              <div>
+                <label className="tr-check-wrap">
+                  <input type="checkbox" checked={agreeToTerms}
                     onChange={(e) => {
                       setAgreeToTerms(e.target.checked);
                       setTouched((t) => ({ ...t, agreeToTerms: true }));
                       setErrors(validate({ ...currentFields(), agreeToTerms: e.target.checked }));
                     }}
-                    className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 transition duration-200 focus:ring-2 focus:ring-blue-500/20 flex-shrink-0"
                   />
-                  <span className="text-sm text-slate-700">
+                  <span>
                     I agree to the{" "}
-                    <Link href="/terms" className="font-semibold text-blue-600 hover:text-blue-700 hover:underline">
-                      Terms of Service
-                    </Link>{" "}
+                    <Link href="/terms">Terms of Service</Link>{" "}
                     and{" "}
-                    <Link href="/privacy" className="font-semibold text-blue-600 hover:text-blue-700 hover:underline">
-                      Privacy Policy
-                    </Link>
+                    <Link href="/privacy">Privacy Policy</Link>
                   </span>
                 </label>
-                {showError("agreeToTerms") && (
-                  <p className="mt-1.5 text-xs text-red-500">{errors.agreeToTerms}</p>
-                )}
+                {showError("agreeToTerms") && <p className="tr-field-error" style={{ marginTop: 8 }}>{errors.agreeToTerms}</p>}
               </div>
 
-              {/* ── Submit ────────────────────────────────────────────────── */}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="mt-8 w-full rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-300 hover:bg-blue-700 hover:shadow-md active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
-              >
+              <button type="submit" className="tr-submit" disabled={isLoading}>
                 {isLoading ? "Creating account…" : "Create Tenant Account"}
               </button>
 
             </form>
 
-            {/* Footer link */}
-            <p className="mt-6 text-center text-sm text-slate-600">
-              Already registered?{" "}
-              <Link
-                href="/login"
-                className="font-semibold text-blue-600 transition duration-300 hover:text-blue-700 hover:underline"
-              >
-                Log in
-              </Link>
+            <p className="tr-footer-link">
+              Already registered? <Link href="/login">Sign in</Link>
             </p>
-
           </div>
+
         </div>
-      </main>
+      </div>
 
       {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-          <div className="relative z-10 w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
-            <button
-              type="button"
-              onClick={() => setShowSuccessModal(false)}
-              className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-              aria-label="Close popup"
-            >
-              <X className="h-4 w-4" />
+        <div className="tr-modal-backdrop">
+          <div className="tr-modal-overlay" />
+          <div className="tr-modal">
+            <button type="button" className="tr-modal-close" onClick={() => setShowSuccessModal(false)} aria-label="Close">
+              <X size={16} />
             </button>
-            <div className="flex items-start gap-4">
-              <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-100">
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900">Account successfully created</h3>
-                <p className="mt-1.5 text-sm text-slate-500">
-                  Your tenant account is ready. Continue to login.
-                </p>
-              </div>
+            <div className="tr-modal-icon">
+              <CheckCircle2 size={22} color="#6B8F5E" />
             </div>
-            <button
-              type="button"
-              onClick={() => router.push("/login")}
-              className="mt-6 w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-            >
+            <h3>Account created</h3>
+            <p>Your tenant account is ready. Continue to sign in.</p>
+            <button type="button" className="tr-modal-btn" onClick={() => router.push("/login")}>
               Go to Login
             </button>
           </div>
@@ -518,16 +679,13 @@ export default function TenantRegisterPage() {
   );
 }
 
-// ── Section divider (local helper) ────────────────────────────────────────────
-
-function SectionDivider({ label }: { label: string }) {
+function LogoIcon() {
   return (
-    <div className="mt-8 flex items-center gap-3">
-      <div className="flex-1 border-t border-slate-200" />
-      <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-        {label}
-      </span>
-      <div className="flex-1 border-t border-slate-200" />
-    </div>
+    <svg viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="8" fill="#C4956A" />
+      <path d="M8 24V10a2 2 0 012-2h12a2 2 0 012 2v14" stroke="#1A1714" strokeWidth="2" strokeLinecap="round" />
+      <path d="M12 24V16h8v8" stroke="#1A1714" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="16" y1="16" x2="16" y2="24" stroke="#1A1714" strokeWidth="2" />
+    </svg>
   );
 }

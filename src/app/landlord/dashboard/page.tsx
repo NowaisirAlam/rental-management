@@ -60,14 +60,14 @@ function StatCard({
   helper: string;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-          <p className="mt-2 text-4xl font-bold text-slate-900">{value}</p>
-          <p className="mt-1 text-sm text-slate-400">{helper}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+          <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
+          <p className="mt-1 text-xs text-slate-400">{helper}</p>
         </div>
-        <div className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${iconBg}`}>
+        <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${iconBg}`}>
           <Icon className={`h-5 w-5 ${iconColor}`} strokeWidth={2} />
         </div>
       </div>
@@ -133,18 +133,18 @@ export default function LandlordDashboard() {
   const userName = session?.user?.name?.split(" ")[0] ?? "there";
 
   return (
-    <div className="mx-auto w-full max-w-[1280px] px-6 pb-8 lg:px-10">
+    <div className="mx-auto w-full max-w-[1200px] px-6 pb-6 lg:px-10">
 
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Welcome back, {userName}</h1>
-        <p className="mt-1 text-base text-slate-500">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-900">Welcome back, {userName}</h1>
+        <p className="mt-1 text-sm text-slate-500">
           Here&apos;s an overview of your properties for {new Date().toLocaleString("en-US", { month: "long", year: "numeric" })}.
         </p>
       </div>
 
       {/* Stat cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         <StatCard
           icon={DollarSign}
           iconBg="bg-[#0d2818]"
@@ -180,30 +180,30 @@ export default function LandlordDashboard() {
       </div>
 
       {/* Quick actions */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6 mb-6">
-        <h2 className="mb-4 text-base font-semibold text-slate-700">Quick Actions</h2>
-        <div className="flex flex-wrap gap-3">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 mb-5">
+        <h2 className="mb-3 text-sm font-semibold text-slate-700">Quick Actions</h2>
+        <div className="flex flex-wrap gap-2">
           <Link
             href="/landlord/properties"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#1e1e2e] px-4 py-2.5 text-base font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#1e1e2e] px-3 py-2 text-sm font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95"
           >
             <Plus className="h-4 w-4" /> Add New Property
           </Link>
           <Link
             href="/landlord/leases"
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-base font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95"
           >
             <Users className="h-4 w-4" /> Add Tenant
           </Link>
           <Link
             href="/landlord/announcements"
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-base font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95"
           >
             <Bell className="h-4 w-4" /> Create Announcement
           </Link>
           <Link
             href="/landlord/payments"
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-base font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-95"
           >
             <CreditCard className="h-4 w-4" /> View Payments
           </Link>
@@ -211,31 +211,31 @@ export default function LandlordDashboard() {
       </div>
 
       {/* Lower two-column */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
 
         {/* Recent payments */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-slate-700">Recent Payments</h2>
-            <Link href="/landlord/payments" className="text-sm font-medium text-[#5e6ad2] hover:underline">
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-700">Recent Payments</h2>
+            <Link href="/landlord/payments" className="text-xs font-medium text-[#5e6ad2] hover:underline">
               View all
             </Link>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {recentPayments.length === 0 && (
-              <p className="text-base text-slate-400 py-4 text-center">No payments yet.</p>
+              <p className="text-sm text-slate-400 py-3 text-center">No payments yet.</p>
             )}
             {recentPayments.map((row) => (
               <div key={row.id} className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-base font-medium text-slate-800">{row.property.name}</p>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm font-medium text-slate-800">{row.property.name}</p>
+                  <p className="text-xs text-slate-400">
                     {new Date(row.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-base font-semibold text-slate-900">${row.amount.toLocaleString()}</span>
-                  <span className={`inline-flex rounded-full px-2.5 py-0.5 text-sm font-semibold ${paymentStatusColor[row.status] ?? "bg-slate-100 text-slate-600"}`}>
+                  <span className="text-sm font-semibold text-slate-900">${row.amount.toLocaleString()}</span>
+                  <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${paymentStatusColor[row.status] ?? "bg-slate-100 text-slate-600"}`}>
                     {row.status}
                   </span>
                 </div>
@@ -245,16 +245,16 @@ export default function LandlordDashboard() {
         </div>
 
         {/* Recent maintenance */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-slate-700">Recent Maintenance</h2>
-            <Link href="/landlord/maintenance" className="text-sm font-medium text-[#5e6ad2] hover:underline">
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-700">Recent Maintenance</h2>
+            <Link href="/landlord/maintenance" className="text-xs font-medium text-[#5e6ad2] hover:underline">
               View all
             </Link>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {recentMaintenance.length === 0 && (
-              <p className="text-base text-slate-400 py-4 text-center">No maintenance requests yet.</p>
+              <p className="text-sm text-slate-400 py-3 text-center">No maintenance requests yet.</p>
             )}
             {recentMaintenance.map((t) => (
               <div key={t.id} className="flex items-center justify-between gap-3">

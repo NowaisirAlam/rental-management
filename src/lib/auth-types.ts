@@ -8,6 +8,7 @@ declare module "next-auth" {
       name: string;
       role: string;
       propertyId: string | null;
+      subscriptionStatus?: string;
     };
   }
 
@@ -15,5 +16,6 @@ declare module "next-auth" {
     id?: string;
     role?: string;
     propertyId?: string | null;
+    subscriptionStatus?: string;
   }
 }

@@ -42,6 +42,22 @@ export async function POST(req: Request) {
   const parsed = createPropertySchema.safeParse(body);
   if (!parsed.success) return error(parsed.error.issues[0].message, 400);
 
+  const [user, propertyCount] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { subscriptionStatus: true },
+    }),
+    prisma.property.count({
+      where: { ownerId: session.user.id },
+    }),
+  ]);
+
+  if (!user) return error("User not found", 404);
+
+  if (user.subscriptionStatus !== "ACTIVE" && propertyCount >= 1) {
+    return error("Free plan includes 1 property. Upgrade to Pro to add more properties.", 403);
+  }
+
   const property = await prisma.property.create({
     data: {
       name: parsed.data.name,

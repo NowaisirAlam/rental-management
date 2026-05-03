@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { Plus, Home, Upload, Trash2, X, CheckCircle2, ChevronDown,
          MoreVertical, Eye, Pencil, AlertTriangle, ImagePlus } from "lucide-react";
 
@@ -14,6 +15,8 @@ type Property = {
   tenants: { id: string; name: string; email: string }[];
   _count: { maintenanceRequests: number; rentPayments: number };
 };
+
+type SubscriptionStatus = "FREE" | "ACTIVE";
 
 const PROPERTY_TYPES = [
   "Apartment Building", "Condo", "Single Family Home",
@@ -177,6 +180,7 @@ function ConfirmDeleteModal({ title, onCancel, onConfirm }: { title: string; onC
 
 export default function LandlordProperties() {
   const [properties, setProperties] = useState<Property[]>([]);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>("FREE");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm]     = useState(false);
@@ -205,6 +209,18 @@ export default function LandlordProperties() {
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3500); };
+  const isFreeAtPropertyLimit = subscriptionStatus !== "ACTIVE" && properties.length >= 1;
+
+  const openAddForm = () => {
+    if (isFreeAtPropertyLimit) {
+      setShowForm(false);
+      showToast("Free plan includes 1 property. Upgrade to Pro to add more properties.");
+      return;
+    }
+    resetForm();
+    setEditingId(null);
+    setShowForm((v) => !v);
+  };
 
   // Fetch properties on mount
   useEffect(() => {
@@ -215,12 +231,20 @@ export default function LandlordProperties() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch("/api/properties");
-      if (!res.ok) {
-        throw new Error(`Failed to fetch properties: ${res.statusText}`);
+      const [propertiesRes, profileRes] = await Promise.all([
+        fetch("/api/properties"),
+        fetch("/api/profile"),
+      ]);
+      if (!propertiesRes.ok) {
+        throw new Error(`Failed to fetch properties: ${propertiesRes.statusText}`);
       }
-      const data = await res.json();
+      if (!profileRes.ok) {
+        throw new Error(`Failed to fetch profile: ${profileRes.statusText}`);
+      }
+      const data = await propertiesRes.json();
+      const profile = await profileRes.json();
       setProperties(data);
+      setSubscriptionStatus(profile.subscriptionStatus === "ACTIVE" ? "ACTIVE" : "FREE");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load properties");
       console.error("Error fetching properties:", err);
@@ -290,7 +314,13 @@ export default function LandlordProperties() {
         });
 
         if (!res.ok) {
-          throw new Error(`Failed to create property: ${res.statusText}`);
+          const data = await res.json().catch(() => null);
+          if (res.status === 403) {
+            setShowForm(false);
+            showToast(data?.error ?? "Free plan includes 1 property. Upgrade to Pro to add more properties.");
+            return;
+          }
+          throw new Error(data?.error ?? `Failed to create property: ${res.statusText}`);
         }
 
         showToast(`"${name}" added successfully.`);
@@ -384,13 +414,42 @@ export default function LandlordProperties() {
           <h1 className="text-3xl font-bold text-slate-900">Properties</h1>
           <p className="mt-1 text-base text-slate-500">Add and manage all your properties in one place.</p>
         </div>
-        <button
-          onClick={() => { resetForm(); setEditingId(null); setShowForm((v) => !v); }}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#1e1e2e] px-4 py-2.5 text-base font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95"
-        >
-          <Plus className="h-4 w-4" /> Add Property
-        </button>
+        {isFreeAtPropertyLimit ? (
+          <Link
+            href="/landlord/billing"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#C4956A] px-4 py-2.5 text-base font-semibold text-[#1A1714] transition hover:bg-[#B07E55] active:scale-95"
+          >
+            Upgrade to Add Property
+          </Link>
+        ) : (
+          <button
+            onClick={openAddForm}
+            className="inline-flex items-center gap-2 rounded-xl bg-[#1e1e2e] px-4 py-2.5 text-base font-semibold text-[#818cf8] transition hover:bg-[#252535] active:scale-95"
+          >
+            <Plus className="h-4 w-4" /> Add Property
+          </button>
+        )}
       </div>
+
+      {isFreeAtPropertyLimit && (
+        <div className="mb-6 rounded-2xl border border-[#C4956A]/30 bg-[#C4956A]/10 p-5 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-[#C4956A]">Free plan limit reached</p>
+              <h2 className="mt-1 text-lg font-semibold text-slate-900">Upgrade to add more properties</h2>
+              <p className="mt-1 text-base text-slate-500">
+                Free plan includes 1 property. Pro unlocks up to 50 properties for $29/month.
+              </p>
+            </div>
+            <Link
+              href="/landlord/billing"
+              className="inline-flex shrink-0 items-center justify-center rounded-xl bg-[#C4956A] px-4 py-2.5 text-base font-semibold text-[#1A1714] transition hover:bg-[#B07E55] active:scale-95"
+            >
+              View Pro Plan
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Add / Edit property form */}
       {showForm && (
