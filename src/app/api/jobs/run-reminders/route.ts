@@ -50,7 +50,7 @@ export async function POST() {
     dueDate: p.dueDate,
   }));
 
-  const overdue = overdueRaw.map((p) => ({
+  const overdue = overdueRaw.map((p: any) => ({
     propertyName: p.property.name,
     amount: p.amount,
     dueDate: p.dueDate,
