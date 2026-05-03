@@ -44,7 +44,7 @@ export async function POST() {
     }),
   ]);
 
-  const upcoming = upcomingRaw.map((p) => ({
+  const upcoming = upcomingRaw.map((p: any) => ({
     propertyName: p.property.name,
     amount: p.amount,
     dueDate: p.dueDate,
