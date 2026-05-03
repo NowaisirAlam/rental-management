@@ -1,9 +1,9 @@
-# Claude Code Instructions — PropManager (Local-Only Hackathon)
+# Claude Code Instructions — PropManager (Production)
 
 ## What's Built
 
 PropManager is a full-stack rental management app for landlords and tenants.
-Everything runs locally — no cloud, no SaaS, no managed databases.
+It is a live product serving real customers, deployed on a cloud platform.
 
 **Landlord can:**
 - Manage properties (create, edit, delete)
@@ -23,27 +23,21 @@ Everything runs locally — no cloud, no SaaS, no managed databases.
 
 ---
 
-## Non-Negotiable Constraint (Hackathon Rule)
-- NO cloud services and NO managed platforms.
-- No Vercel/Netlify/Firebase/Supabase/Railway/Render/Heroku.
-- No hosted databases (Supabase Postgres, Atlas, etc.).
-- Everything must run locally on a machine we control.
+## Deployment
 
-✅ Allowed:
-- Next.js running locally
-- SQLite database file in this repo
-- Prisma ORM
-- Local credential login (email/password)
-- Local "jobs" triggered manually or via local scheduler script
+- Target: Cloud platform with a **persistent filesystem volume** (Railway or Render).
+- **Do NOT deploy to Vercel serverless** — SQLite requires a persistent disk; Vercel's ephemeral filesystem will lose data between deployments.
+- The app is served as a single Next.js process (not serverless functions).
+- Environment variables (`.env`) must be set in the platform's dashboard, not committed to the repo.
 
 ---
 
-## Tech Stack (Local Only)
+## Tech Stack
 - Next.js (App Router)
 - Prisma ORM
 - SQLite database (file: `prisma/dev.db`)
-- Auth: NextAuth/Auth.js with **Credentials provider only**
-  - NO Google/Facebook/Github OAuth
+- Auth: NextAuth/Auth.js with **Credentials provider only** (email/password)
+- SQLite requires a persistent volume in production — use Railway or Render, not Vercel
 
 ---
 
@@ -59,7 +53,7 @@ Everything runs locally — no cloud, no SaaS, no managed databases.
 ---
 
 ## Database Rules
-- DB must be SQLite:
+- Currently using SQLite — appropriate for current scale (1 landlord + tenants).
   - `.env`: `DATABASE_URL="file:./dev.db"`
   - `schema.prisma` datasource provider must be `sqlite`
 - Store passwords hashed (bcryptjs). Never store raw passwords.
@@ -265,7 +259,7 @@ Schemas: `src/lib/validations.ts`
 | `utilities` and `occupants` stored as JSON strings | SQLite has no native array type |
 | Email not updatable via profile API | Changing email would invalidate the active JWT session |
 | Announcement read/unread state: local component state only | Avoids a DB column for a cosmetic UI concern |
-| Password change does not invalidate JWT | Acceptable trade-off for a local hackathon |
+| Password change does not invalidate JWT | Acceptable for current scale; revisit if session security requirements increase |
 | Tenant assignment and lease creation are separate operations | Assignment links the user to a property; the lease defines the terms — both must be done |
 | `npm run jobs` queries DB directly (no HTTP) | Avoids session auth complexity in a CLI context |
 
