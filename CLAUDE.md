@@ -351,7 +351,7 @@ Helpers in `src/lib/api-helpers.ts`:
 - Short sentences, no filler.
 - One-word summaries in commit messages (fix:, add:, chore:).
 - Show the diff; assume reader can infer intent.
-- Also to note how to filter each words by keeping it short but not contextless
+- Also to note how to filter each words by keeping it short but not countlesss
 
 ---
 
